@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Management System</title>
+    <style>
+        * { box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { margin: 0; padding: 10px; background: #f0f2f5; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #1a73e8; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; }
+        .tab { padding: 10px 15px; background: #e8f0fe; border: none; border-radius: 5px; cursor: pointer; }
+        .tab.active { background: #1a73e8; color: white; }
+        .section { display: none; }
+        .section.active { display: block; }
+        input, select { width: 100%; padding: 8px; margin: 5px 0 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { background: #1a73e8; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; margin: 5px 0; }
+        button:hover { background: #1557b0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f1f3f4; }
+        .tick { color: green; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media(max-width:600px){ .grid { grid-template-columns: 1fr; } table{ font-size:12px; } }
+        .att-day { display: inline-block; width: 30px; text-align: center; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>College Student Management</h1>
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('add', this)">Add Student</button>
+        <button class="tab" onclick="showTab('attendance', this)">Mark Attendance</button>
+        <button class="tab" onclick="showTab('marks', this)">Add Marks</button>
+        <button class="tab" onclick="showTab('register', this)">Class Register</button>
+        <button class="tab" onclick="showTab('search', this)">Search</button>
+    </div>
+
+    <div id="add" class="section active">
+        <h3>Add New Student</h3>
+        <div class="grid">
+            <input id="roll" type="number" placeholder="Roll No">
+            <input id="name" type="text" placeholder="Name">
+            <input id="sec" type="text" placeholder="Section">
+        </div>
+        <button onclick="addStudent()">Save Student</button>
+    </div>
+
+    <div id="attendance" class="section">
+        <h3>Mark Daily Attendance</h3>
+        <input id="attDate" type="date">
+        <div id="attList"></div>
+        <button onclick="saveAttendance()">Save Attendance</button>
+    </div>
+
+    <div id="marks" class="section">
+        <h3>Add/Update Marks</h3>
+        <input id="marksRoll" type="number" placeholder="Enter Roll No" oninput="loadStudentMarks()">
+        <div id="marksForm"></div>
+        <button onclick="saveMarks()">Update Marks</button>
+    </div>
+
+    <div id="register" class="section">
+        <h3>Class Register</h3>
+        <div id="registerTable"></div>
+    </div>
+
+    <div id="search" class="section">
+        <h3>Search Student</h3>
+        <input id="searchRoll" type="number" placeholder="Enter Roll No">
+        <button onclick="searchStudent()">Search</button>
+        <div id="searchResult"></div>
+    </div>
+</div>
+
+<script>
+const subjects = ["Math", "Physics", "Chemistry", "English", "Computer"];
+let students = JSON.parse(localStorage.getItem('students') || '[]');
+
+function saveData() {
+    localStorage.setItem('students', JSON.stringify(students));
+}
+
+function showTab(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+    if(id === 'attendance') loadAttendanceList();
+    if(id === 'register') loadRegister();
+}
+
+function addStudent() {
+    let roll = document.getElementById('roll').value;
+    let name = document.getElementById('name').value;
+    let sec = document.getElementById('sec').value;
+    if(!roll || !name || !sec) { alert('Sab field bharo'); return; }
+    if(students.find(s => s.roll == roll)) { alert('Roll No already exists'); return; }
+    
+    students.push({
+        roll: parseInt(roll),
+        name: name,
+        sec: sec,
+        marks: [-1,-1,-1,-1,-1],
+        attendance: []
+    });
+    saveData();
+    document.getElementById('roll').value = '';
+    document.getElementById('name').value = '';
+    document.getElementById('sec').value = '';
+    alert('Student Added!');
+}
+
+function loadAttendanceList() {
+    let date = document.getElementById('attDate').value;
+    if(!date) {
+        document.getElementById('attDate').valueAsDate = new Date();
+        date = document.getElementById('attDate').value;
+    }
+    let html = '<table><tr><th>Roll</th><th>Name</th><th>Sec</th><th>Present</th></tr>';
+    students.forEach(s => {
+        let todayAtt = s.attendance.find(a => a.date === date);
+        let checked = todayAtt && todayAtt.present ? 'checked' : '';
+        html += `<tr>
+            <td>${s.roll}</td>
+            <td>${s.name}</td>
+            <td>${s.sec}</td>
+            <td><input type="checkbox" data-roll="${s.roll}" ${checked}></td>
+        </tr>`;
+    });
+    html += '</table>';
+    document.getElementById('attList').innerHTML = html;
+}
+
+function saveAttendance() {
+    let date = document.getElementById('attDate').value;
+    if(!date) { alert('Date select karo'); return; }
+    
+    document.querySelectorAll('#attList input[type=checkbox]').forEach(cb => {
+        let roll = parseInt(cb.dataset.roll);
+        let student = students.find(s => s.roll === roll);
+        let attIndex = student.attendance.findIndex(a => a.date === date);
+        if(attIndex >= 0) {
+            student.attendance[attIndex].present = cb.checked ? 1 : 0;
+        } else {
+            student.attendance.push({date: date, present: cb.checked ? 1 : 0});
+        }
+    });
+    saveData();
+    alert('Attendance Saved for ' + date);
+}
+
+function calcPercentage(s) {
+    if(s.attendance.length === 0) return 0;
+    let present = s.attendance.filter(a => a.present === 1).length;
+    return (present / s.attendance.length * 100).toFixed(1);
+}
+
+function loadStudentMarks() {
+    let roll = document.getElementById('marksRoll').value;
+    let s = students.find(st => st.roll == roll);
+    if(!s) { document.getElementById('marksForm').innerHTML = ''; return; }
+    
+    let html = '<div class="grid">';
+    subjects.forEach((sub, i) => {
+        let val = s.marks[i] === -1 ? '' : s.marks[i];
+        html += `<div><label>${sub}</label><input type="number" id="mark${i}" value="${val}" placeholder="Marks"></div>`;
+    });
+    html += '</div>';
+    document.getElementById('marksForm').innerHTML = html;
+}
+
+function saveMarks() {
+    let roll = document.getElementById('marksRoll').value;
+    let s = students.find(st => st.roll == roll);
+    if(!s) { alert('Student not found'); return; }
+    
+    for(let i = 0; i < subjects.length; i++) {
+        let val = document.getElementById(`mark${i}`).value;
+        s.marks[i] = val === '' ? -1 : parseInt(val);
+    }
+    saveData();
+    alert('Marks Updated!');
+}
+
+function loadRegister() {
+    let html = '<table><tr><th>Roll</th><th>Name</th><th>Sec</th><th>Present%</th>';
+    subjects.forEach(sub => html += `<th>${sub.slice(0,3)}</th>`);
+    html += '</tr>';
+    
+    students.forEach(s => {
+        html += `<tr><td>${s.roll}</td><td>${s.name}</td><td>${s.sec}</td><td>${calcPercentage(s)}%</td>`;
+        s.marks.forEach(m => {
+            html += `<td>${m === -1 ? '-' : m}</td>`;
+        });
+        html += '</tr>';
+    });
+    html += '</table>';
+    document.getElementById('registerTable').innerHTML = html;
+}
+
+function searchStudent() {
+    let roll = document.getElementById('searchRoll').value;
+    let s = students.find(st => st.roll == roll);
+    if(!s) { document.getElementById('searchResult').innerHTML = 'Not Found'; return; }
+    
+    let attHtml = s.attendance.map(a => 
+        `<div class="att-day">${a.date.slice(-2)}<br><span class="${a.present?'tick':''}">${a.present?'✓':' '}</span></div>`
+    ).join('');
+    
+    let marksHtml = subjects.map((sub,i) => 
+        `<tr><td>${sub}</td><td>${s.marks[i]===-1?'-':s.marks[i]}</td></tr>`
+    ).join('');
+    
+    document.getElementById('searchResult').innerHTML = `
+        <h4>${s.name} [${s.sec}] - Roll: ${s.roll}</h4>
+        <p><b>Attendance: ${calcPercentage(s)}%</b> | Total Days: ${s.attendance.length}</p>
+        <div style="margin:10px 0; padding:10px; background:#f8f9fa; border-radius:5px;">
+            <b>Attendance Chart:</b><br>${attHtml}
+        </div>
+        <table><tr><th>Subject</th><th>Marks</th></tr>${marksHtml}</table>
+    `;
+}
+
+document.getElementById('attDate').valueAsDate = new Date();
+</script>
+</body>
+</html>
