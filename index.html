@@ -29,34 +29,12 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { font-family: 'Poppins', sans-serif; }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        
-        .bg-gradient {
-            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #db2777 100%);
-            background-attachment: fixed;
-        }
-
-        .floating {
-            animation: floating 3s ease-in-out infinite;
-        }
-        
-        @keyframes floating {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-        }
-
-        .btn-hover {
-            transition: all 0.3s ease;
-        }
-        .btn-hover:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
+        .glass { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .bg-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #db2777 100%); background-attachment: fixed; }
+        .floating { animation: floating 3s ease-in-out infinite; }
+        @keyframes floating { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
+        .btn-hover { transition: all 0.3s ease; }
+        .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body class="bg-gradient min-h-screen">
@@ -90,20 +68,10 @@
                     <option value="student" class="text-gray-800">🎓 Student</option>
                     <option value="parent" class="text-gray-800">👨‍👩‍👧 Parent</option>
                 </select>
-                
-                <input id="username" type="text" placeholder="Username" 
-                       class="w-full bg-white/20 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
-                
-                <input id="password" type="password" placeholder="Password" 
-                       class="w-full bg-white/20 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
-                
-                <button onclick="doLogin()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold btn-hover">
-                    Login to Portal 🚀
-                </button>
-                
-                <button onclick="guestLogin()" class="w-full bg-white/20 text-white py-3 rounded-lg font-semibold btn-hover border border-white/30">
-                    Try Demo Account 👀
-                </button>
+                <input id="username" type="text" placeholder="Username" class="w-full bg-white/20 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
+                <input id="password" type="password" placeholder="Password" class="w-full bg-white/20 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
+                <button onclick="doLogin()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold btn-hover">Login to Portal 🚀</button>
+                <button onclick="guestLogin()" class="w-full bg-white/20 text-white py-3 rounded-lg font-semibold btn-hover border border-white/30">Try Demo Account 👀</button>
             </div>
 
             <div class="mt-6 text-xs text-center text-blue-200">
@@ -128,7 +96,7 @@
                 </button>
             </nav>
 
-            <!-- FIXED: Sab div properly close kiye -->
+            <!-- FIXED: Har card ka </div> properly close kiya -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="glass rounded-xl p-4 text-white">
                     <div class="flex justify-between items-center">
@@ -138,7 +106,6 @@
                         </div>
                         <i data-lucide="users" class="w-8 h-8 text-blue-400"></i>
                     </div>
-                </div>
                 <div class="glass rounded-xl p-4 text-white">
                     <div class="flex justify-between items-center">
                         <div>
@@ -241,10 +208,10 @@
                 document.getElementById('liveCount').innerText = count + ' Users Registered';
             } catch(e) {
                 document.getElementById('liveCount').innerText = '0 Users Registered';
+                console.log(e);
             }
         }
         updateLiveCount();
-        setInterval(updateLiveCount, 10000);
 
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
@@ -254,25 +221,6 @@
             toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
-
-        async function initDefaultUsers() {
-            try {
-                const adminRef = window.dbRef(window.db, 'users/admin');
-                const adminSnap = await window.dbGet(adminRef);
-                if (!adminSnap.exists()) {
-                    await window.dbSet(adminRef, { role: 'admin', username: 'admin', password: 'admin123', fullName: 'System Admin' });
-                }
-                const guestRef = window.dbRef(window.db, 'users/guest');
-                const guestSnap = await window.dbGet(guestRef);
-                if (!guestSnap.exists()) {
-                    await window.dbSet(guestRef, { role: 'student', username: 'guest', password: 'guest123', fullName: 'Demo Guest' });
-                }
-            } catch(e) {
-                console.log('Init error:', e);
-                showToast('Firebase connect nahi hua! Rules check karo', 'error');
-            }
-        }
-        setTimeout(initDefaultUsers, 1500);
 
         async function guestLogin() {
             document.getElementById('role').value = 'student';
@@ -311,7 +259,7 @@
                         showToast("Galat Password ya Role! 🤔", 'error'); 
                     }
                 } else { 
-                    showToast("User nahi mila! Firebase me check karo 📞", 'error'); 
+                    showToast("User nahi mila! 📞", 'error'); 
                 }
             } catch(e) {
                 showToast("Firebase error! Rules check karo 🔥", 'error');
