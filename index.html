@@ -6,7 +6,6 @@
     <title>EduVerse - Smart Student Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     
     <!-- Firebase SDK -->
     <script type="module">
@@ -33,16 +32,17 @@
         * { font-family: 'Poppins', sans-serif; }
         
         .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
         .bg-school {
-            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
             url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070');
             background-size: cover;
             background-position: center;
+            background-attachment: fixed;
         }
 
         .floating {
@@ -51,7 +51,7 @@
         
         @keyframes floating {
             0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
+            50% { transform: translateY(-15px); }
         }
 
         .btn-hover {
@@ -59,26 +59,23 @@
         }
         .btn-hover:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
     </style>
 </head>
 <body class="bg-school min-h-screen">
     
-    <!-- 3D Character - Spline -->
-    <div class="fixed top-4 right-4 w-64 h-64 z-50 pointer-events-none">
-        <iframe src='https://my.spline.design/robotfollowcursorforlandingpage-a8e8e8e8e8e8/' 
-                frameborder='0' 
-                width='100%' 
-                height='100%'
-                class="floating">
-        </iframe>
+    <!-- Simple Floating Icon Instead of 3D -->
+    <div class="fixed top-6 right-6 w-20 h-20 z-40 floating">
+        <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl">
+            <i data-lucide="bot" class="w-10 h-10 text-white"></i>
+        </div>
     </div>
 
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
         <div class="max-w-md w-full glass rounded-2xl shadow-2xl p-8">
-            <!-- Logo + Animated Text -->
+            <!-- Logo -->
             <div class="text-center mb-6">
                 <div class="flex justify-center mb-4">
                     <i data-lucide="graduation-cap" class="w-16 h-16 text-blue-400"></i>
@@ -124,10 +121,9 @@
         </div>
     </div>
 
-    <!-- DASHBOARD -->
+    <!-- DASHBOARD - Baaki same hai -->
     <div id="dashboard" class="hidden min-h-screen p-4">
         <div class="max-w-7xl mx-auto">
-            <!-- Navbar -->
             <nav class="glass rounded-2xl p-4 mb-6 flex justify-between items-center">
                 <div class="flex items-center gap-3">
                     <i data-lucide="graduation-cap" class="w-8 h-8 text-blue-400"></i>
@@ -141,7 +137,6 @@
                 </button>
             </nav>
 
-            <!-- Stats Cards - Public Interest -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="glass rounded-xl p-4 text-white">
                     <div class="flex justify-between items-center">
@@ -181,9 +176,7 @@
                 </div>
             </div>
 
-            <!-- Main Content -->
             <div class="glass rounded-2xl p-6">
-                <!-- ADMIN: CREATE USER -->
                 <div id="userManagePanel" class="mb-8 p-4 bg-blue-500/20 rounded-xl border border-blue-400/30 hidden">
                     <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
                         <i data-lucide="user-plus" class="w-5 h-5"></i> Create New User Account
@@ -200,7 +193,6 @@
                     </div>
                 </div>
 
-                <!-- ADMIN: ADD STUDENT DATA -->
                 <div id="adminPanel" class="mb-8 p-4 bg-white/10 rounded-xl border border-white/20 hidden">
                     <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
                         <i data-lucide="file-plus" class="w-5 h-5"></i> Add / Edit Student Data
@@ -215,7 +207,6 @@
                     <button onclick="saveStudent()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg btn-hover">Save Student 💾</button>
                 </div>
 
-                <!-- Search + PDF -->
                 <div class="flex flex-col md:flex-row gap-4 mb-4">
                     <input id="searchInput" type="text" onkeyup="showStudents()" placeholder="🔍 Search students..." class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg flex-1">
                     <button onclick="downloadPDF()" class="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg btn-hover flex items-center gap-2">
@@ -223,7 +214,6 @@
                     </button>
                 </div>
 
-                <!-- Student Table -->
                 <div class="overflow-x-auto rounded-xl">
                     <table class="w-full">
                         <thead class="bg-white/20">
@@ -243,8 +233,7 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-4 right-4 hidden"></div>
+    <div id="toast" class="fixed bottom-4 right-4 hidden z-50"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
@@ -252,7 +241,6 @@
         lucide.createIcons();
         let currentUser = null;
 
-        // Live count animation
         setInterval(() => {
             const count = 520 + Math.floor(Math.random() * 10);
             document.getElementById('liveCount').innerText = count + ' Students Online';
@@ -261,32 +249,35 @@
         function showToast(msg, type = 'success') {
             const toast = document.getElementById('toast');
             const color = type === 'success' ? 'bg-green-500' : 'bg-red-500';
-            toast.className = `fixed bottom-4 right-4 ${color} text-white px-6 py-3 rounded-lg shadow-lg`;
+            toast.className = `fixed bottom-4 right-4 ${color} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
             toast.innerText = msg;
             toast.classList.remove('hidden');
             setTimeout(() => toast.classList.add('hidden'), 3000);
         }
 
-        async function initAdmin() {
-            const usersRef = window.dbRef(window.db, 'users/admin');
-            const snapshot = await window.dbGet(usersRef);
-            if (!snapshot.exists()) {
-                await window.dbSet(usersRef, { role: 'admin', username: 'admin', password: 'admin123', fullName: 'System Admin' });
-            }
-            // Init guest
-            const guestRef = window.dbRef(window.db, 'users/guest');
-            const guestSnap = await window.dbGet(guestRef);
-            if (!guestSnap.exists()) {
-                await window.dbSet(guestRef, { role: 'student', username: 'guest', password: 'guest123', fullName: 'Demo Guest' });
+        async function initDefaultUsers() {
+            try {
+                const adminRef = window.dbRef(window.db, 'users/admin');
+                const adminSnap = await window.dbGet(adminRef);
+                if (!adminSnap.exists()) {
+                    await window.dbSet(adminRef, { role: 'admin', username: 'admin', password: 'admin123', fullName: 'System Admin' });
+                }
+                const guestRef = window.dbRef(window.db, 'users/guest');
+                const guestSnap = await window.dbGet(guestRef);
+                if (!guestSnap.exists()) {
+                    await window.dbSet(guestRef, { role: 'student', username: 'guest', password: 'guest123', fullName: 'Demo Guest' });
+                }
+            } catch(e) {
+                console.log('Init error:', e);
             }
         }
-        setTimeout(initAdmin, 1000);
+        setTimeout(initDefaultUsers, 1500);
 
         async function guestLogin() {
             document.getElementById('role').value = 'student';
             document.getElementById('username').value = 'guest';
             document.getElementById('password').value = 'guest123';
-            doLogin();
+            await doLogin();
         }
 
         async function doLogin() {
@@ -298,27 +289,32 @@
                 return; 
             }
 
-            const userRef = window.dbRef(window.db, `users/${username}`);
-            const snapshot = await window.dbGet(userRef);
-            if (snapshot.exists()) {
-                const user = snapshot.val();
-                if (user.role === role && user.password === password) {
-                    currentUser = user;
-                    document.getElementById('loginScreen').classList.add('hidden');
-                    document.getElementById('dashboard').classList.remove('hidden');
-                    document.getElementById('userInfo').innerText = `${user.fullName} (${user.role})`;
-                    if (user.role === 'admin') {
-                        document.getElementById('adminPanel').classList.remove('hidden');
-                        document.getElementById('userManagePanel').classList.remove('hidden');
-                        document.getElementById('actionHead').classList.remove('hidden');
+            try {
+                const userRef = window.dbRef(window.db, `users/${username}`);
+                const snapshot = await window.dbGet(userRef);
+                if (snapshot.exists()) {
+                    const user = snapshot.val();
+                    if (user.role === role && user.password === password) {
+                        currentUser = user;
+                        document.getElementById('loginScreen').classList.add('hidden');
+                        document.getElementById('dashboard').classList.remove('hidden');
+                        document.getElementById('userInfo').innerText = `${user.fullName} (${user.role})`;
+                        if (user.role === 'admin') {
+                            document.getElementById('adminPanel').classList.remove('hidden');
+                            document.getElementById('userManagePanel').classList.remove('hidden');
+                            document.getElementById('actionHead').classList.remove('hidden');
+                        }
+                        showStudents();
+                        showToast(`Welcome back, ${user.fullName}! 🎉`);
+                    } else { 
+                        showToast("Galat Password ya Role! 🤔", 'error'); 
                     }
-                    showStudents();
-                    showToast(`Welcome back, ${user.fullName}! 🎉`);
                 } else { 
-                    showToast("Galat Password ya Role! 🤔", 'error'); 
+                    showToast("User nahi mila! Pehle admin se banao 📞", 'error'); 
                 }
-            } else { 
-                showToast("User nahi mila! Admin se contact karo 📞", 'error'); 
+            } catch(e) {
+                showToast("Firebase error! Rules check karo 🔥", 'error');
+                console.log(e);
             }
         }
 
@@ -336,7 +332,7 @@
         }
 
         async function createUser() {
-            if (currentUser.role !== 'admin') return;
+            if (currentUser?.role !== 'admin') return;
             const role = document.getElementById('newUserRole').value;
             const username = document.getElementById('newUsername').value;
             const password = document.getElementById('newPassword').value;
@@ -361,23 +357,25 @@
         }
 
         async function getStudents() {
-            const studentsRef = window.dbRef(window.db, 'students');
-            const snapshot = await window.dbGet(studentsRef);
-            if (snapshot.exists()) { 
-                const data = Object.entries(snapshot.val()).map(([key, val]) => ({...val, key}));
-                document.getElementById('totalStudents').innerText = data.length;
-                return data;
+            try {
+                const studentsRef = window.dbRef(window.db, 'students');
+                const snapshot = await window.dbGet(studentsRef);
+                if (snapshot.exists()) { 
+                    const data = Object.entries(snapshot.val()).map(([key, val]) => ({...val, key}));
+                    document.getElementById('totalStudents').innerText = data.length;
+                    return data;
+                }
+                document.getElementById('totalStudents').innerText = 0;
+                return [];
+            } catch(e) {
+                return [];
             }
-            document.getElementById('totalStudents').innerText = 0;
-            return [];
         }
 
         async function saveStudent() {
-            if (currentUser.role !== 'admin') return;
+            if (currentUser?.role !== 'admin') return;
             const name = document.getElementById('name').value; 
             const roll = document.getElementById('roll').value;
             const course = document.getElementById('course').value; 
             const email = document.getElementById('email').value;
-            const editIndex = document.getElementById('editIndex').value;
-            if(!name || !roll || !course) { 
-                showToast('Na
+            const editIndex = document.getEleme
