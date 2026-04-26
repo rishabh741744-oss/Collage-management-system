@@ -122,6 +122,7 @@
                         <h1 class="text-2xl font-bold text-white">EduVerse</h1>
                         <p class="text-blue-200 text-sm">Welcome, <span id="userInfo" class="font-semibold"></span></p>
                     </div>
+                </div>
                 <button onclick="doLogout()" class="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg btn-hover flex items-center gap-2">
                     <i data-lucide="log-out" class="w-4 h-4"></i> Logout
                 </button>
@@ -374,5 +375,4 @@
 
             if (editIndex === '') {
                 const newStudentRef = window.dbPush(window.dbRef(window.db, 'students'));
-                await window.dbSet(newStudentRef, {name, roll, course, email});
-                show
+                await window.dbSet(newStudentRef, {name, roll, course, email}
