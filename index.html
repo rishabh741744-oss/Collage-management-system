@@ -1,229 +1,254 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>College Management System</title>
-    <style>
-        * { box-sizing: border-box; font-family: Arial, sans-serif; }
-        body { margin: 0; padding: 10px; background: #f0f2f5; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #1a73e8; }
-        .tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; }
-        .tab { padding: 10px 15px; background: #e8f0fe; border: none; border-radius: 5px; cursor: pointer; }
-        .tab.active { background: #1a73e8; color: white; }
-        .section { display: none; }
-        .section.active { display: block; }
-        input, select { width: 100%; padding: 8px; margin: 5px 0 10px; border: 1px solid #ccc; border-radius: 4px; }
-        button { background: #1a73e8; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; margin: 5px 0; }
-        button:hover { background: #1557b0; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background: #f1f3f4; }
-        .tick { color: green; font-weight: bold; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        @media(max-width:600px){ .grid { grid-template-columns: 1fr; } table{ font-size:12px; } }
-        .att-day { display: inline-block; width: 30px; text-align: center; }
-    </style>
+    <title>Student Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, get, push, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+
+        // TERA FIREBASE CONFIG - YE HI PASTE KARNA HAI
+        const firebaseConfig = {
+          apiKey: "AIzaSyAnajb7aYGO0KWKSWT5SJZnpT0-lPoESnw",
+          authDomain: "student-management-37282.firebaseapp.com",
+          databaseURL: "https://student-management-37282-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "student-management-37282",
+          storageBucket: "student-management-37282.firebasestorage.app",
+          messagingSenderId: "760085295267",
+          appId: "1:760085295267:web:cd7420ce5e2885f005cf16"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        window.db = db; window.dbRef = ref; window.dbSet = set; window.dbGet = get; window.dbPush = push; window.dbRemove = remove; window.dbUpdate = update;
+    </script>
 </head>
-<body>
-<div class="container">
-    <h1>College Student Management</h1>
-    <div class="tabs">
-        <button class="tab active" onclick="showTab('add', this)">Add Student</button>
-        <button class="tab" onclick="showTab('attendance', this)">Mark Attendance</button>
-        <button class="tab" onclick="showTab('marks', this)">Add Marks</button>
-        <button class="tab" onclick="showTab('register', this)">Class Register</button>
-        <button class="tab" onclick="showTab('search', this)">Search</button>
-    </div>
-
-    <div id="add" class="section active">
-        <h3>Add New Student</h3>
-        <div class="grid">
-            <input id="roll" type="number" placeholder="Roll No">
-            <input id="name" type="text" placeholder="Name">
-            <input id="sec" type="text" placeholder="Section">
+<body class="bg-gray-100">
+    <!-- LOGIN SCREEN -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
+            <h1 class="text-3xl font-bold text-center mb-2 text-blue-600">Student Portal</h1>
+            <p class="text-center text-gray-500 mb-6">Real-time Database Active</p>
+            <div class="space-y-4">
+                <select id="role" class="w-full border p-2 rounded">
+                    <option value="">-- Select Role --</option>
+                    <option value="admin">Admin</option>
+                    <option value="student">Student</option>
+                    <option value="parent">Parent</option>
+                </select>
+                <input id="username" type="text" placeholder="Username" class="w-full border p-2 rounded">
+                <input id="password" type="password" placeholder="Password" class="w-full border p-2 rounded">
+                <button onclick="doLogin()" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Login</button>
+            </div>
+            <div class="mt-4 text-xs text-gray-500 text-center">
+                <p><b>Default Admin:</b> admin / admin123</p>
+            </div>
         </div>
-        <button onclick="addStudent()">Save Student</button>
     </div>
 
-    <div id="attendance" class="section">
-        <h3>Mark Daily Attendance</h3>
-        <input id="attDate" type="date">
-        <div id="attList"></div>
-        <button onclick="saveAttendance()">Save Attendance</button>
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="hidden p-4">
+        <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-3xl font-bold text-blue-600">Student Management System</h1>
+                    <p class="text-gray-600">Welcome, <span id="userInfo" class="font-semibold"></span></p>
+                </div>
+                <button onclick="doLogout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
+            </div>
+
+            <!-- ADMIN: CREATE USER -->
+            <div id="userManagePanel" class="mb-8 p-4 border-2 border-blue-200 rounded-lg bg-blue-50 hidden">
+                <h2 class="text-xl font-semibold mb-4 text-blue-700">Create New User Account</h2>
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    <select id="newUserRole" class="border p-2 rounded">
+                        <option value="student">Student</option>
+                        <option value="parent">Parent</option>
+                    </select>
+                    <input id="newUsername" type="text" placeholder="Username/Roll No" class="border p-2 rounded">
+                    <input id="newPassword" type="text" placeholder="Password" class="border p-2 rounded">
+                    <input id="newUserFullName" type="text" placeholder="Full Name" class="border p-2 rounded">
+                    <button onclick="createUser()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Create User</button>
+                </div>
+                <p class="text-xs text-gray-600 mt-2">* Ye user ab kisi bhi device se login kar payega</p>
+            </div>
+
+            <!-- ADMIN: ADD STUDENT DATA -->
+            <div id="adminPanel" class="mb-8 p-4 border rounded-lg hidden">
+                <h2 class="text-xl font-semibold mb-4">Add / Edit Student Data</h2>
+                <input type="hidden" id="editIndex">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <input id="name" type="text" placeholder="Student Name" class="border p-2 rounded">
+                    <input id="roll" type="text" placeholder="Roll Number" class="border p-2 rounded">
+                    <input id="course" type="text" placeholder="Course" class="border p-2 rounded">
+                    <input id="email" type="text" placeholder="Email" class="border p-2 rounded">
+                </div>
+                <button onclick="saveStudent()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Student</button>
+            </div>
+
+            <!-- Search + PDF -->
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <input id="searchInput" type="text" onkeyup="showStudents()" placeholder="Search..." class="border p-2 rounded flex-1">
+                <button onclick="downloadPDF()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Download PDF</button>
+            </div>
+
+            <!-- Student Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse border">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="border p-2">S.No</th><th class="border p-2">Name</th><th class="border p-2">Roll No</th>
+                            <th class="border p-2">Course</th><th class="border p-2">Email</th><th id="actionHead" class="border p-2 hidden">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTable"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <div id="marks" class="section">
-        <h3>Add/Update Marks</h3>
-        <input id="marksRoll" type="number" placeholder="Enter Roll No" oninput="loadStudentMarks()">
-        <div id="marksForm"></div>
-        <button onclick="saveMarks()">Update Marks</button>
-    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script>
+        let currentUser = null;
 
-    <div id="register" class="section">
-        <h3>Class Register</h3>
-        <div id="registerTable"></div>
-    </div>
-
-    <div id="search" class="section">
-        <h3>Search Student</h3>
-        <input id="searchRoll" type="number" placeholder="Enter Roll No">
-        <button onclick="searchStudent()">Search</button>
-        <div id="searchResult"></div>
-    </div>
-</div>
-
-<script>
-const subjects = ["Math", "Physics", "Chemistry", "English", "Computer"];
-let students = JSON.parse(localStorage.getItem('students') || '[]');
-
-function saveData() {
-    localStorage.setItem('students', JSON.stringify(students));
-}
-
-function showTab(id, btn) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-    btn.classList.add('active');
-    if(id === 'attendance') loadAttendanceList();
-    if(id === 'register') loadRegister();
-}
-
-function addStudent() {
-    let roll = document.getElementById('roll').value;
-    let name = document.getElementById('name').value;
-    let sec = document.getElementById('sec').value;
-    if(!roll || !name || !sec) { alert('Sab field bharo'); return; }
-    if(students.find(s => s.roll == roll)) { alert('Roll No already exists'); return; }
-    
-    students.push({
-        roll: parseInt(roll),
-        name: name,
-        sec: sec,
-        marks: [-1,-1,-1,-1,-1],
-        attendance: []
-    });
-    saveData();
-    document.getElementById('roll').value = '';
-    document.getElementById('name').value = '';
-    document.getElementById('sec').value = '';
-    alert('Student Added!');
-}
-
-function loadAttendanceList() {
-    let date = document.getElementById('attDate').value;
-    if(!date) {
-        document.getElementById('attDate').valueAsDate = new Date();
-        date = document.getElementById('attDate').value;
-    }
-    let html = '<table><tr><th>Roll</th><th>Name</th><th>Sec</th><th>Present</th></tr>';
-    students.forEach(s => {
-        let todayAtt = s.attendance.find(a => a.date === date);
-        let checked = todayAtt && todayAtt.present ? 'checked' : '';
-        html += `<tr>
-            <td>${s.roll}</td>
-            <td>${s.name}</td>
-            <td>${s.sec}</td>
-            <td><input type="checkbox" data-roll="${s.roll}" ${checked}></td>
-        </tr>`;
-    });
-    html += '</table>';
-    document.getElementById('attList').innerHTML = html;
-}
-
-function saveAttendance() {
-    let date = document.getElementById('attDate').value;
-    if(!date) { alert('Date select karo'); return; }
-    
-    document.querySelectorAll('#attList input[type=checkbox]').forEach(cb => {
-        let roll = parseInt(cb.dataset.roll);
-        let student = students.find(s => s.roll === roll);
-        let attIndex = student.attendance.findIndex(a => a.date === date);
-        if(attIndex >= 0) {
-            student.attendance[attIndex].present = cb.checked ? 1 : 0;
-        } else {
-            student.attendance.push({date: date, present: cb.checked ? 1 : 0});
+        async function initAdmin() {
+            const usersRef = window.dbRef(window.db, 'users/admin');
+            const snapshot = await window.dbGet(usersRef);
+            if (!snapshot.exists()) {
+                await window.dbSet(usersRef, { role: 'admin', username: 'admin', password: 'admin123', fullName: 'System Admin' });
+            }
         }
-    });
-    saveData();
-    alert('Attendance Saved for ' + date);
-}
+        setTimeout(initAdmin, 2000);
 
-function calcPercentage(s) {
-    if(s.attendance.length === 0) return 0;
-    let present = s.attendance.filter(a => a.present === 1).length;
-    return (present / s.attendance.length * 100).toFixed(1);
-}
+        async function doLogin() {
+            const role = document.getElementById('role').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            if (!role ||!username ||!password) { alert("Sab fields bharo"); return; }
 
-function loadStudentMarks() {
-    let roll = document.getElementById('marksRoll').value;
-    let s = students.find(st => st.roll == roll);
-    if(!s) { document.getElementById('marksForm').innerHTML = ''; return; }
-    
-    let html = '<div class="grid">';
-    subjects.forEach((sub, i) => {
-        let val = s.marks[i] === -1 ? '' : s.marks[i];
-        html += `<div><label>${sub}</label><input type="number" id="mark${i}" value="${val}" placeholder="Marks"></div>`;
-    });
-    html += '</div>';
-    document.getElementById('marksForm').innerHTML = html;
-}
+            const userRef = window.dbRef(window.db, `users/${username}`);
+            const snapshot = await window.dbGet(userRef);
+            if (snapshot.exists()) {
+                const user = snapshot.val();
+                if (user.role === role && user.password === password) {
+                    currentUser = user;
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('dashboard').classList.remove('hidden');
+                    document.getElementById('userInfo').innerText = `${user.fullName} (${user.role})`;
+                    if (user.role === 'admin') {
+                        document.getElementById('adminPanel').classList.remove('hidden');
+                        document.getElementById('userManagePanel').classList.remove('hidden');
+                        document.getElementById('actionHead').classList.remove('hidden');
+                    }
+                    showStudents();
+                } else { alert("Galat Password ya Role!"); }
+            } else { alert("User nahi mila! Admin se contact karo"); }
+        }
 
-function saveMarks() {
-    let roll = document.getElementById('marksRoll').value;
-    let s = students.find(st => st.roll == roll);
-    if(!s) { alert('Student not found'); return; }
-    
-    for(let i = 0; i < subjects.length; i++) {
-        let val = document.getElementById(`mark${i}`).value;
-        s.marks[i] = val === '' ? -1 : parseInt(val);
-    }
-    saveData();
-    alert('Marks Updated!');
-}
+        function doLogout() {
+            currentUser = null;
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('userManagePanel').classList.add('hidden');
+            document.getElementById('actionHead').classList.add('hidden');
+            document.getElementById('role').value = ''; document.getElementById('username').value = ''; document.getElementById('password').value = '';
+        }
 
-function loadRegister() {
-    let html = '<table><tr><th>Roll</th><th>Name</th><th>Sec</th><th>Present%</th>';
-    subjects.forEach(sub => html += `<th>${sub.slice(0,3)}</th>`);
-    html += '</tr>';
-    
-    students.forEach(s => {
-        html += `<tr><td>${s.roll}</td><td>${s.name}</td><td>${s.sec}</td><td>${calcPercentage(s)}%</td>`;
-        s.marks.forEach(m => {
-            html += `<td>${m === -1 ? '-' : m}</td>`;
-        });
-        html += '</tr>';
-    });
-    html += '</table>';
-    document.getElementById('registerTable').innerHTML = html;
-}
+        async function createUser() {
+            if (currentUser.role!== 'admin') return;
+            const role = document.getElementById('newUserRole').value;
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const fullName = document.getElementById('newUserFullName').value;
+            if(!username ||!password ||!fullName) { alert('Sab fields bharo'); return; }
 
-function searchStudent() {
-    let roll = document.getElementById('searchRoll').value;
-    let s = students.find(st => st.roll == roll);
-    if(!s) { document.getElementById('searchResult').innerHTML = 'Not Found'; return; }
-    
-    let attHtml = s.attendance.map(a => 
-        `<div class="att-day">${a.date.slice(-2)}<br><span class="${a.present?'tick':''}">${a.present?'✓':' '}</span></div>`
-    ).join('');
-    
-    let marksHtml = subjects.map((sub,i) => 
-        `<tr><td>${sub}</td><td>${s.marks[i]===-1?'-':s.marks[i]}</td></tr>`
-    ).join('');
-    
-    document.getElementById('searchResult').innerHTML = `
-        <h4>${s.name} [${s.sec}] - Roll: ${s.roll}</h4>
-        <p><b>Attendance: ${calcPercentage(s)}%</b> | Total Days: ${s.attendance.length}</p>
-        <div style="margin:10px 0; padding:10px; background:#f8f9fa; border-radius:5px;">
-            <b>Attendance Chart:</b><br>${attHtml}
-        </div>
-        <table><tr><th>Subject</th><th>Marks</th></tr>${marksHtml}</table>
-    `;
-}
+            const userRef = window.dbRef(window.db, `users/${username}`);
+            const snapshot = await window.dbGet(userRef);
+            if (snapshot.exists()) { alert('Ye username pehle se hai!'); return; }
 
-document.getElementById('attDate').valueAsDate = new Date();
-</script>
+            await window.dbSet(userRef, { role, username, password, fullName });
+            alert(`User ban gaya! Ab ${username} kahin se bhi login kar sakta hai.\nPassword: ${password}`);
+            document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('newUserFullName').value = '';
+        }
+
+        async function getStudents() {
+            const studentsRef = window.dbRef(window.db, 'students');
+            const snapshot = await window.dbGet(studentsRef);
+            if (snapshot.exists()) { return Object.entries(snapshot.val()).map(([key, val]) => ({...val, key})); }
+            return [];
+        }
+
+        async function saveStudent() {
+            if (currentUser.role!== 'admin') return;
+            const name = document.getElementById('name').value; const roll = document.getElementById('roll').value;
+            const course = document.getElementById('course').value; const email = document.getElementById('email').value;
+            const editIndex = document.getElementById('editIndex').value;
+            if(!name ||!roll ||!course) { alert('Name, Roll No, Course zaruri hai'); return; }
+
+            if (editIndex === '') {
+                const newStudentRef = window.dbPush(window.dbRef(window.db, 'students'));
+                await window.dbSet(newStudentRef, {name, roll, course, email});
+            } else {
+                await window.dbUpdate(window.dbRef(window.db, `students/${editIndex}`), {name, roll, course, email});
+            }
+            clearForm(); showStudents();
+        }
+
+        async function editStudent(key) {
+            if (currentUser.role!== 'admin') return;
+            const studentRef = window.dbRef(window.db, `students/${key}`);
+            const snapshot = await window.dbGet(studentRef);
+            if (snapshot.exists()) {
+                const student = snapshot.val();
+                document.getElementById('name').value = student.name; document.getElementById('roll').value = student.roll;
+                document.getElementById('course').value = student.course; document.getElementById('email').value = student.email || '';
+                document.getElementById('editIndex').value = key; window.scrollTo(0, 0);
+            }
+        }
+
+        async function deleteStudent(key) {
+            if (currentUser.role!== 'admin') return;
+            if (confirm('Pakka delete karna hai?')) {
+                await window.dbRemove(window.dbRef(window.db, `students/${key}`));
+                showStudents();
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('name').value = ''; document.getElementById('roll').value = '';
+            document.getElementById('course').value = ''; document.getElementById('email').value = ''; document.getElementById('editIndex').value = '';
+        }
+
+        async function showStudents() {
+            const students = await getStudents();
+            const table = document.getElementById('studentTable');
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            table.innerHTML = '';
+            students.forEach((student, index) => {
+                if (student.name.toLowerCase().includes(searchText) || student.roll.toLowerCase().includes(searchText) || student.course.toLowerCase().includes(searchText)) {
+                    table.innerHTML += `<tr>
+                        <td class="border p-2">${index + 1}</td><td class="border p-2">${student.name}</td><td class="border p-2">${student.roll}</td>
+                        <td class="border p-2">${student.course}</td><td class="border p-2">${student.email || '-'}</td>
+                        <td class="border p-2 ${currentUser.role === 'admin'? '' : 'hidden'}">
+                            <button onclick="editStudent('${student.key}')" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm mr-1">Edit</button>
+                            <button onclick="deleteStudent('${student.key}')" class="bg-red-500 text-white px-2 py-1 rounded text-sm">Delete</button>
+                        </td></tr>`;
+                }
+            });
+        }
+
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf; const doc = new jsPDF(); const students = await getStudents();
+            doc.setFontSize(18); doc.text("Student Management Sheet", 14, 20);
+            const tableData = students.map((s, i) => [i+1, s.name, s.roll, s.course, s.email || '-']);
+            doc.autoTable({ head: [['S.No', 'Name', 'Roll No', 'Course', 'Email']], body: tableData, startY: 35 });
+            doc.save('Student_List.pdf');
+        }
+    </script>
 </body>
 </html>
