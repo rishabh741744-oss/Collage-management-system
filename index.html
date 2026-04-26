@@ -78,7 +78,7 @@
                 <div class="mt-2 flex justify-center gap-2 text-sm text-green-300">
                     <span class="flex items-center gap-1">
                         <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                        <span id="liveCount">0 Students Online</span>
+                        <span id="liveCount">Loading...</span>
                     </span>
                 </div>
             </div>
@@ -128,6 +128,7 @@
                 </button>
             </nav>
 
+            <!-- FIXED: Sab div properly close kiye -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div class="glass rounded-xl p-4 text-white">
                     <div class="flex justify-between items-center">
@@ -232,7 +233,6 @@
         lucide.createIcons();
         let currentUser = null;
 
-        // REAL COUNT - Fake wala hata diya
         async function updateLiveCount() {
             try {
                 const usersRef = window.dbRef(window.db, 'users');
@@ -269,7 +269,7 @@
                 }
             } catch(e) {
                 console.log('Init error:', e);
-                showToast('Firebase connect nahi hua! Console check karo', 'error');
+                showToast('Firebase connect nahi hua! Rules check karo', 'error');
             }
         }
         setTimeout(initDefaultUsers, 1500);
@@ -311,7 +311,7 @@
                         showToast("Galat Password ya Role! 🤔", 'error'); 
                     }
                 } else { 
-                    showToast("User nahi mila! Firebase me 'users/guest' check karo 📞", 'error'); 
+                    showToast("User nahi mila! Firebase me check karo 📞", 'error'); 
                 }
             } catch(e) {
                 showToast("Firebase error! Rules check karo 🔥", 'error');
@@ -377,4 +377,116 @@
         async function saveStudent() {
             if (currentUser?.role !== 'admin') return;
             const name = document.getElementById('name').value; 
-            const roll = document.getElementById('roll').
+            const roll = document.getElementById('roll').value;
+            const course = document.getElementById('course').value; 
+            const email = document.getElementById('email').value;
+            const editIndex = document.getElementById('editIndex').value;
+            if(!name || !roll || !course) { 
+                showToast('Name, Roll No, Course zaruri hai 📚', 'error'); 
+                return; 
+            }
+
+            if (editIndex === '') {
+                const newStudentRef = window.dbPush(window.dbRef(window.db, 'students'));
+                await window.dbSet(newStudentRef, {name, roll, course, email});
+                showToast('Student add ho gaya! 🎓');
+            } else {
+                await window.dbUpdate(window.dbRef(window.db, `students/${editIndex}`), {name, roll, course, email});
+                showToast('Student update ho gaya! ✏️');
+            }
+            clearForm(); 
+            showStudents();
+        }
+
+        async function editStudent(key) {
+            if (currentUser?.role !== 'admin') return;
+            const studentRef = window.dbRef(window.db, `students/${key}`);
+            const snapshot = await window.dbGet(studentRef);
+            if (snapshot.exists()) {
+                const student = snapshot.val();
+                document.getElementById('name').value = student.name; 
+                document.getElementById('roll').value = student.roll;
+                document.getElementById('course').value = student.course; 
+                document.getElementById('email').value = student.email || '';
+                document.getElementById('editIndex').value = key; 
+                window.scrollTo(0, 0);
+                showToast('Edit mode on! ✏️');
+            }
+        }
+
+        async function deleteStudent(key) {
+            if (currentUser?.role !== 'admin') return;
+            if (confirm('Pakka delete karna hai? 🗑️')) {
+                await window.dbRemove(window.dbRef(window.db, `students/${key}`));
+                showToast('Student delete ho gaya 🗑️');
+                showStudents();
+            }
+        }
+
+        function clearForm() {
+            document.getElementById('name').value = ''; 
+            document.getElementById('roll').value = '';
+            document.getElementById('course').value = ''; 
+            document.getElementById('email').value = ''; 
+            document.getElementById('editIndex').value = '';
+        }
+
+        async function showStudents() {
+            const students = await getStudents();
+            const table = document.getElementById('studentTable');
+            const searchText = document.getElementById('searchInput').value.toLowerCase();
+            table.innerHTML = '';
+            
+            if (students.length === 0) {
+                table.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-blue-200">Koi student nahi mila. Pehla student add karo 🚀</td></tr>`;
+                return;
+            }
+
+            students.forEach((student, index) => {
+                if (student.name.toLowerCase().includes(searchText) || 
+                    student.roll.toLowerCase().includes(searchText) || 
+                    student.course.toLowerCase().includes(searchText)) {
+                    table.innerHTML += `<tr class="border-b border-white/10 hover:bg-white/5">
+                        <td class="p-3">${index + 1}</td>
+                        <td class="p-3 font-medium">${student.name}</td>
+                        <td class="p-3">${student.roll}</td>
+                        <td class="p-3">${student.course}</td>
+                        <td class="p-3">${student.email || '-'}</td>
+                        <td class="p-3 ${currentUser?.role === 'admin' ? '' : 'hidden'}">
+                            <button onclick="editStudent('${student.key}')" class="bg-yellow-500/80 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm mr-1 btn-hover">Edit</button>
+                            <button onclick="deleteStudent('${student.key}')" class="bg-red-500/80 hover:bg-red-600 text-white px-3 py-1 rounded text-sm btn-hover">Delete</button>
+                        </td></tr>`;
+                }
+            });
+            lucide.createIcons();
+        }
+
+        async function downloadPDF() {
+            const { jsPDF } = window.jspdf; 
+            const doc = new jsPDF(); 
+            const students = await getStudents();
+            doc.setFontSize(18); 
+            doc.text("EduVerse - Student List", 14, 20);
+            const tableData = students.map((s, i) => [i+1, s.name, s.roll, s.course, s.email || '-']);
+            doc.autoTable({ 
+                head: [['S.No', 'Name', 'Roll No', 'Course', 'Email']], 
+                body: tableData, 
+                startY: 35,
+                theme: 'grid'
+            });
+            doc.save('EduVerse_Students.pdf');
+            showToast('PDF download ho gaya! 📄');
+        }
+
+        window.doLogin = doLogin;
+        window.guestLogin = guestLogin;
+        window.doLogout = doLogout;
+        window.createUser = createUser;
+        window.saveStudent = saveStudent;
+        window.editStudent = editStudent;
+        window.deleteStudent = deleteStudent;
+        window.downloadPDF = downloadPDF;
+        window.showStudents = showStudents;
+    </script>
+</body>
+</html>
