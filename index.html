@@ -3,14 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management System</title>
+    <title>EduVerse - Smart Student Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getDatabase, ref, set, get, push, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
 
-        // TERA CONFIG - DIRECT PASTE KAR DIYA
         const firebaseConfig = {
           apiKey: "AIzaSyAnajb7aYGO0KWKSWT5SJZnpT0-lPoESnw",
           authDomain: "student-management-37282.firebaseapp.com",
@@ -25,94 +27,245 @@
         const db = getDatabase(app);
         window.db = db; window.dbRef = ref; window.dbSet = set; window.dbGet = get; window.dbPush = push; window.dbRemove = remove; window.dbUpdate = update;
     </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        * { font-family: 'Poppins', sans-serif; }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .bg-school {
+            background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), 
+            url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+        .btn-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+    </style>
 </head>
-<body class="bg-gray-100">
+<body class="bg-school min-h-screen">
+    
+    <!-- 3D Character - Spline -->
+    <div class="fixed top-4 right-4 w-64 h-64 z-50 pointer-events-none">
+        <iframe src='https://my.spline.design/robotfollowcursorforlandingpage-a8e8e8e8e8e8/' 
+                frameborder='0' 
+                width='100%' 
+                height='100%'
+                class="floating">
+        </iframe>
+    </div>
+
     <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-md w-full bg-white rounded-lg shadow-lg p-8">
-            <h1 class="text-3xl font-bold text-center mb-2 text-blue-600">Student Portal</h1>
-            <p class="text-center text-gray-500 mb-6">Real-time Database Active</p>
-            <div class="space-y-4">
-                <select id="role" class="w-full border p-2 rounded">
-                    <option value="">-- Select Role --</option>
-                    <option value="admin">Admin</option>
-                    <option value="student">Student</option>
-                    <option value="parent">Parent</option>
-                </select>
-                <input id="username" type="text" placeholder="Username" class="w-full border p-2 rounded">
-                <input id="password" type="password" placeholder="Password" class="w-full border p-2 rounded">
-                <button onclick="doLogin()" class="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600">Login</button>
+        <div class="max-w-md w-full glass rounded-2xl shadow-2xl p-8">
+            <!-- Logo + Animated Text -->
+            <div class="text-center mb-6">
+                <div class="flex justify-center mb-4">
+                    <i data-lucide="graduation-cap" class="w-16 h-16 text-blue-400"></i>
+                </div>
+                <h1 class="text-4xl font-bold text-white mb-2">EduVerse</h1>
+                <p class="text-blue-200">Smart Student Management</p>
+                <div class="mt-2 flex justify-center gap-2 text-sm text-green-300">
+                    <span class="flex items-center gap-1">
+                        <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                        <span id="liveCount">523 Students Online</span>
+                    </span>
+                </div>
             </div>
-            <div class="mt-4 text-xs text-gray-500 text-center">
+
+            <!-- Login Form -->
+            <div class="space-y-4">
+                <select id="role" class="w-full bg-white/20 text-white border border-white/30 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
+                    <option value="" class="text-gray-800">-- Select Role --</option>
+                    <option value="admin" class="text-gray-800">👨‍💼 Admin</option>
+                    <option value="student" class="text-gray-800">🎓 Student</option>
+                    <option value="parent" class="text-gray-800">👨‍👩‍👧 Parent</option>
+                </select>
+                
+                <input id="username" type="text" placeholder="Username" 
+                       class="w-full bg-white/20 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
+                
+                <input id="password" type="password" placeholder="Password" 
+                       class="w-full bg-white/20 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
+                
+                <button onclick="doLogin()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold btn-hover">
+                    Login to Portal 🚀
+                </button>
+                
+                <button onclick="guestLogin()" class="w-full bg-white/20 text-white py-3 rounded-lg font-semibold btn-hover border border-white/30">
+                    Try Demo Account 👀
+                </button>
+            </div>
+
+            <div class="mt-6 text-xs text-center text-blue-200">
                 <p><b>Default Admin:</b> admin / admin123</p>
+                <p><b>Demo Guest:</b> guest / guest123</p>
             </div>
         </div>
     </div>
 
     <!-- DASHBOARD -->
-    <div id="dashboard" class="hidden p-4">
-        <div class="max-w-6xl mx-auto bg-white rounded-lg shadow-lg p-6">
-            <div class="flex justify-between items-center mb-6">
-                <div>
-                    <h1 class="text-3xl font-bold text-blue-600">Student Management System</h1>
-                    <p class="text-gray-600">Welcome, <span id="userInfo" class="font-semibold"></span></p>
+    <div id="dashboard" class="hidden min-h-screen p-4">
+        <div class="max-w-7xl mx-auto">
+            <!-- Navbar -->
+            <nav class="glass rounded-2xl p-4 mb-6 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="graduation-cap" class="w-8 h-8 text-blue-400"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">EduVerse</h1>
+                        <p class="text-blue-200 text-sm">Welcome, <span id="userInfo" class="font-semibold"></span></p>
+                    </div>
                 </div>
-                <button onclick="doLogout()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</button>
-            </div>
+                <button onclick="doLogout()" class="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg btn-hover flex items-center gap-2">
+                    <i data-lucide="log-out" class="w-4 h-4"></i> Logout
+                </button>
+            </nav>
 
-            <!-- ADMIN: CREATE USER -->
-            <div id="userManagePanel" class="mb-8 p-4 border-2 border-blue-200 rounded-lg bg-blue-50 hidden">
-                <h2 class="text-xl font-semibold mb-4 text-blue-700">Create New User Account</h2>
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    <select id="newUserRole" class="border p-2 rounded">
-                        <option value="student">Student</option>
-                        <option value="parent">Parent</option>
-                    </select>
-                    <input id="newUsername" type="text" placeholder="Username/Roll No" class="border p-2 rounded">
-                    <input id="newPassword" type="text" placeholder="Password" class="border p-2 rounded">
-                    <input id="newUserFullName" type="text" placeholder="Full Name" class="border p-2 rounded">
-                    <button onclick="createUser()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Create User</button>
+            <!-- Stats Cards - Public Interest -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="glass rounded-xl p-4 text-white">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-blue-200 text-sm">Total Students</p>
+                            <p class="text-2xl font-bold" id="totalStudents">0</p>
+                        </div>
+                        <i data-lucide="users" class="w-8 h-8 text-blue-400"></i>
+                    </div>
+                </div>
+                <div class="glass rounded-xl p-4 text-white">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-blue-200 text-sm">Active Today</p>
+                            <p class="text-2xl font-bold">142</p>
+                        </div>
+                        <i data-lucide="activity" class="w-8 h-8 text-green-400"></i>
+                    </div>
+                </div>
+                <div class="glass rounded-xl p-4 text-white">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-blue-200 text-sm">Avg Attendance</p>
+                            <p class="text-2xl font-bold">87%</p>
+                        </div>
+                        <i data-lucide="calendar-check" class="w-8 h-8 text-purple-400"></i>
+                    </div>
+                </div>
+                <div class="glass rounded-xl p-4 text-white">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-blue-200 text-sm">Top Performer</p>
+                            <p class="text-lg font-bold">Roll: 101</p>
+                        </div>
+                        <i data-lucide="trophy" class="w-8 h-8 text-yellow-400"></i>
+                    </div>
                 </div>
             </div>
 
-            <!-- ADMIN: ADD STUDENT DATA -->
-            <div id="adminPanel" class="mb-8 p-4 border rounded-lg hidden">
-                <h2 class="text-xl font-semibold mb-4">Add / Edit Student Data</h2>
-                <input type="hidden" id="editIndex">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <input id="name" type="text" placeholder="Student Name" class="border p-2 rounded">
-                    <input id="roll" type="text" placeholder="Roll Number" class="border p-2 rounded">
-                    <input id="course" type="text" placeholder="Course" class="border p-2 rounded">
-                    <input id="email" type="text" placeholder="Email" class="border p-2 rounded">
+            <!-- Main Content -->
+            <div class="glass rounded-2xl p-6">
+                <!-- ADMIN: CREATE USER -->
+                <div id="userManagePanel" class="mb-8 p-4 bg-blue-500/20 rounded-xl border border-blue-400/30 hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                        <i data-lucide="user-plus" class="w-5 h-5"></i> Create New User Account
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <select id="newUserRole" class="bg-white/20 text-white border border-white/30 p-2 rounded-lg">
+                            <option value="student" class="text-gray-800">Student</option>
+                            <option value="parent" class="text-gray-800">Parent</option>
+                        </select>
+                        <input id="newUsername" type="text" placeholder="Username/Roll No" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <input id="newPassword" type="text" placeholder="Password" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <input id="newUserFullName" type="text" placeholder="Full Name" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <button onclick="createUser()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg btn-hover">Create User</button>
+                    </div>
                 </div>
-                <button onclick="saveStudent()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Save Student</button>
-            </div>
 
-            <!-- Search + PDF -->
-            <div class="flex flex-col md:flex-row gap-4 mb-4">
-                <input id="searchInput" type="text" onkeyup="showStudents()" placeholder="Search..." class="border p-2 rounded flex-1">
-                <button onclick="downloadPDF()" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Download PDF</button>
-            </div>
+                <!-- ADMIN: ADD STUDENT DATA -->
+                <div id="adminPanel" class="mb-8 p-4 bg-white/10 rounded-xl border border-white/20 hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                        <i data-lucide="file-plus" class="w-5 h-5"></i> Add / Edit Student Data
+                    </h2>
+                    <input type="hidden" id="editIndex">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <input id="name" type="text" placeholder="Student Name" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <input id="roll" type="text" placeholder="Roll Number" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <input id="course" type="text" placeholder="Course" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <input id="email" type="text" placeholder="Email" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                    </div>
+                    <button onclick="saveStudent()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg btn-hover">Save Student 💾</button>
+                </div>
 
-            <!-- Student Table -->
-            <div class="overflow-x-auto">
-                <table class="w-full border-collapse border">
-                    <thead class="bg-gray-200">
-                        <tr>
-                            <th class="border p-2">S.No</th><th class="border p-2">Name</th><th class="border p-2">Roll No</th>
-                            <th class="border p-2">Course</th><th class="border p-2">Email</th><th id="actionHead" class="border p-2 hidden">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="studentTable"></tbody>
-                </table>
+                <!-- Search + PDF -->
+                <div class="flex flex-col md:flex-row gap-4 mb-4">
+                    <input id="searchInput" type="text" onkeyup="showStudents()" placeholder="🔍 Search students..." class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg flex-1">
+                    <button onclick="downloadPDF()" class="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg btn-hover flex items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i> Download PDF
+                    </button>
+                </div>
+
+                <!-- Student Table -->
+                <div class="overflow-x-auto rounded-xl">
+                    <table class="w-full">
+                        <thead class="bg-white/20">
+                            <tr class="text-white">
+                                <th class="p-3 text-left">S.No</th>
+                                <th class="p-3 text-left">Name</th>
+                                <th class="p-3 text-left">Roll No</th>
+                                <th class="p-3 text-left">Course</th>
+                                <th class="p-3 text-left">Email</th>
+                                <th id="actionHead" class="p-3 text-left hidden">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTable" class="text-white"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-4 right-4 hidden"></div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
     <script>
+        lucide.createIcons();
         let currentUser = null;
+
+        // Live count animation
+        setInterval(() => {
+            const count = 520 + Math.floor(Math.random() * 10);
+            document.getElementById('liveCount').innerText = count + ' Students Online';
+        }, 3000);
+
+        function showToast(msg, type = 'success') {
+            const toast = document.getElementById('toast');
+            const color = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            toast.className = `fixed bottom-4 right-4 ${color} text-white px-6 py-3 rounded-lg shadow-lg`;
+            toast.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
 
         async function initAdmin() {
             const usersRef = window.dbRef(window.db, 'users/admin');
@@ -120,14 +273,30 @@
             if (!snapshot.exists()) {
                 await window.dbSet(usersRef, { role: 'admin', username: 'admin', password: 'admin123', fullName: 'System Admin' });
             }
+            // Init guest
+            const guestRef = window.dbRef(window.db, 'users/guest');
+            const guestSnap = await window.dbGet(guestRef);
+            if (!guestSnap.exists()) {
+                await window.dbSet(guestRef, { role: 'student', username: 'guest', password: 'guest123', fullName: 'Demo Guest' });
+            }
         }
-        setTimeout(initAdmin, 2000);
+        setTimeout(initAdmin, 1000);
+
+        async function guestLogin() {
+            document.getElementById('role').value = 'student';
+            document.getElementById('username').value = 'guest';
+            document.getElementById('password').value = 'guest123';
+            doLogin();
+        }
 
         async function doLogin() {
             const role = document.getElementById('role').value;
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
-            if (!role ||!username ||!password) { alert("Sab fields bharo"); return; }
+            if (!role || !username || !password) { 
+                showToast("Sab fields bharo 😅", 'error'); 
+                return; 
+            }
 
             const userRef = window.dbRef(window.db, `users/${username}`);
             const snapshot = await window.dbGet(userRef);
@@ -144,8 +313,13 @@
                         document.getElementById('actionHead').classList.remove('hidden');
                     }
                     showStudents();
-                } else { alert("Galat Password ya Role!"); }
-            } else { alert("User nahi mila! Admin se contact karo"); }
+                    showToast(`Welcome back, ${user.fullName}! 🎉`);
+                } else { 
+                    showToast("Galat Password ya Role! 🤔", 'error'); 
+                }
+            } else { 
+                showToast("User nahi mila! Admin se contact karo 📞", 'error'); 
+            }
         }
 
         function doLogout() {
@@ -155,99 +329,55 @@
             document.getElementById('adminPanel').classList.add('hidden');
             document.getElementById('userManagePanel').classList.add('hidden');
             document.getElementById('actionHead').classList.add('hidden');
-            document.getElementById('role').value = ''; document.getElementById('username').value = ''; document.getElementById('password').value = '';
+            document.getElementById('role').value = ''; 
+            document.getElementById('username').value = ''; 
+            document.getElementById('password').value = '';
+            showToast("Logout ho gaya! Phir milte hain 👋");
         }
 
         async function createUser() {
-            if (currentUser.role!== 'admin') return;
+            if (currentUser.role !== 'admin') return;
             const role = document.getElementById('newUserRole').value;
             const username = document.getElementById('newUsername').value;
             const password = document.getElementById('newPassword').value;
             const fullName = document.getElementById('newUserFullName').value;
-            if(!username ||!password ||!fullName) { alert('Sab fields bharo'); return; }
+            if(!username || !password || !fullName) { 
+                showToast('Sab fields bharo 📝', 'error'); 
+                return; 
+            }
 
             const userRef = window.dbRef(window.db, `users/${username}`);
             const snapshot = await window.dbGet(userRef);
-            if (snapshot.exists()) { alert('Ye username pehle se hai!'); return; }
+            if (snapshot.exists()) { 
+                showToast('Ye username pehle se hai! 😅', 'error'); 
+                return; 
+            }
 
             await window.dbSet(userRef, { role, username, password, fullName });
-            alert(`User ban gaya! Ab ${username} kahin se bhi login kar sakta hai.\nPassword: ${password}`);
-            document.getElementById('newUsername').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('newUserFullName').value = '';
+            showToast(`User ban gaya! ${username} ab login kar sakta hai 🎉`);
+            document.getElementById('newUsername').value = ''; 
+            document.getElementById('newPassword').value = ''; 
+            document.getElementById('newUserFullName').value = '';
         }
 
         async function getStudents() {
             const studentsRef = window.dbRef(window.db, 'students');
             const snapshot = await window.dbGet(studentsRef);
-            if (snapshot.exists()) { return Object.entries(snapshot.val()).map(([key, val]) => ({...val, key})); }
+            if (snapshot.exists()) { 
+                const data = Object.entries(snapshot.val()).map(([key, val]) => ({...val, key}));
+                document.getElementById('totalStudents').innerText = data.length;
+                return data;
+            }
+            document.getElementById('totalStudents').innerText = 0;
             return [];
         }
 
         async function saveStudent() {
-            if (currentUser.role!== 'admin') return;
-            const name = document.getElementById('name').value; const roll = document.getElementById('roll').value;
-            const course = document.getElementById('course').value; const email = document.getElementById('email').value;
+            if (currentUser.role !== 'admin') return;
+            const name = document.getElementById('name').value; 
+            const roll = document.getElementById('roll').value;
+            const course = document.getElementById('course').value; 
+            const email = document.getElementById('email').value;
             const editIndex = document.getElementById('editIndex').value;
-            if(!name ||!roll ||!course) { alert('Name, Roll No, Course zaruri hai'); return; }
-
-            if (editIndex === '') {
-                const newStudentRef = window.dbPush(window.dbRef(window.db, 'students'));
-                await window.dbSet(newStudentRef, {name, roll, course, email});
-            } else {
-                await window.dbUpdate(window.dbRef(window.db, `students/${editIndex}`), {name, roll, course, email});
-            }
-            clearForm(); showStudents();
-        }
-
-        async function editStudent(key) {
-            if (currentUser.role!== 'admin') return;
-            const studentRef = window.dbRef(window.db, `students/${key}`);
-            const snapshot = await window.dbGet(studentRef);
-            if (snapshot.exists()) {
-                const student = snapshot.val();
-                document.getElementById('name').value = student.name; document.getElementById('roll').value = student.roll;
-                document.getElementById('course').value = student.course; document.getElementById('email').value = student.email || '';
-                document.getElementById('editIndex').value = key; window.scrollTo(0, 0);
-            }
-        }
-
-        async function deleteStudent(key) {
-            if (currentUser.role!== 'admin') return;
-            if (confirm('Pakka delete karna hai?')) {
-                await window.dbRemove(window.dbRef(window.db, `students/${key}`));
-                showStudents();
-            }
-        }
-
-        function clearForm() {
-            document.getElementById('name').value = ''; document.getElementById('roll').value = '';
-            document.getElementById('course').value = ''; document.getElementById('email').value = ''; document.getElementById('editIndex').value = '';
-        }
-
-        async function showStudents() {
-            const students = await getStudents();
-            const table = document.getElementById('studentTable');
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
-            table.innerHTML = '';
-            students.forEach((student, index) => {
-                if (student.name.toLowerCase().includes(searchText) || student.roll.toLowerCase().includes(searchText) || student.course.toLowerCase().includes(searchText)) {
-                    table.innerHTML += `<tr>
-                        <td class="border p-2">${index + 1}</td><td class="border p-2">${student.name}</td><td class="border p-2">${student.roll}</td>
-                        <td class="border p-2">${student.course}</td><td class="border p-2">${student.email || '-'}</td>
-                        <td class="border p-2 ${currentUser.role === 'admin'? '' : 'hidden'}">
-                            <button onclick="editStudent('${student.key}')" class="bg-yellow-500 text-white px-2 py-1 rounded text-sm mr-1">Edit</button>
-                            <button onclick="deleteStudent('${student.key}')" class="bg-red-500 text-white px-2 py-1 rounded text-sm">Delete</button>
-                        </td></tr>`;
-                }
-            });
-        }
-
-        async function downloadPDF() {
-            const { jsPDF } = window.jspdf; const doc = new jsPDF(); const students = await getStudents();
-            doc.setFontSize(18); doc.text("Student Management Sheet", 14, 20);
-            const tableData = students.map((s, i) => [i+1, s.name, s.roll, s.course, s.email || '-']);
-            doc.autoTable({ head: [['S.No', 'Name', 'Roll No', 'Course', 'Email']], body: tableData, startY: 35 });
-            doc.save('Student_List.pdf');
-        }
-    </script>
-</body>
-</html>
+            if(!name || !roll || !course) { 
+                showToast('Na
