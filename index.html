@@ -122,7 +122,6 @@
                         <h1 class="text-2xl font-bold text-white">EduVerse</h1>
                         <p class="text-blue-200 text-sm">Welcome, <span id="userInfo" class="font-semibold"></span></p>
                     </div>
-                </div>
                 <button onclick="doLogout()" class="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg btn-hover flex items-center gap-2">
                     <i data-lucide="log-out" class="w-4 h-4"></i> Logout
                 </button>
@@ -146,7 +145,6 @@
                         </div>
                         <i data-lucide="activity" class="w-8 h-8 text-green-400"></i>
                     </div>
-                </div>
                 <div class="glass rounded-xl p-4 text-white">
                     <div class="flex justify-between items-center">
                         <div>
@@ -155,7 +153,6 @@
                         </div>
                         <i data-lucide="calendar-check" class="w-8 h-8 text-purple-400"></i>
                     </div>
-                </div>
                 <div class="glass rounded-xl p-4 text-white">
                     <div class="flex justify-between items-center">
                         <div>
@@ -252,17 +249,14 @@
                 const adminSnap = await window.dbGet(adminRef);
                 if (!adminSnap.exists()) {
                     await window.dbSet(adminRef, { role: 'admin', username: 'admin', password: 'admin123', fullName: 'System Admin' });
-                    console.log('Admin created');
                 }
                 const guestRef = window.dbRef(window.db, 'users/guest');
                 const guestSnap = await window.dbGet(guestRef);
                 if (!guestSnap.exists()) {
                     await window.dbSet(guestRef, { role: 'student', username: 'guest', password: 'guest123', fullName: 'Demo Guest' });
-                    console.log('Guest created');
                 }
             } catch(e) {
                 console.log('Init error:', e);
-                showToast('Firebase connect nahi hua! Rules check karo', 'error');
             }
         }
         setTimeout(initDefaultUsers, 1500);
@@ -375,4 +369,10 @@
             const editIndex = document.getElementById('editIndex').value;
             if(!name || !roll || !course) { 
                 showToast('Name, Roll No, Course zaruri hai 📚', 'error'); 
-              
+                return; 
+            }
+
+            if (editIndex === '') {
+                const newStudentRef = window.dbPush(window.dbRef(window.db, 'students'));
+                await window.dbSet(newStudentRef, {name, roll, course, email});
+                show
