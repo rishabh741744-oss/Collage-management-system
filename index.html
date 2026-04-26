@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getDatabase, ref, set, get, push, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
@@ -37,11 +36,8 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
         
-        .bg-school {
-            background-image: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
-            url('https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070');
-            background-size: cover;
-            background-position: center;
+        .bg-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #db2777 100%);
             background-attachment: fixed;
         }
 
@@ -63,19 +59,16 @@
         }
     </style>
 </head>
-<body class="bg-school min-h-screen">
+<body class="bg-gradient min-h-screen">
     
-    <!-- Simple Floating Icon Instead of 3D -->
     <div class="fixed top-6 right-6 w-20 h-20 z-40 floating">
         <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-600 rounded-2xl flex items-center justify-center shadow-2xl">
             <i data-lucide="bot" class="w-10 h-10 text-white"></i>
         </div>
     </div>
 
-    <!-- LOGIN SCREEN -->
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
         <div class="max-w-md w-full glass rounded-2xl shadow-2xl p-8">
-            <!-- Logo -->
             <div class="text-center mb-6">
                 <div class="flex justify-center mb-4">
                     <i data-lucide="graduation-cap" class="w-16 h-16 text-blue-400"></i>
@@ -90,7 +83,6 @@
                 </div>
             </div>
 
-            <!-- Login Form -->
             <div class="space-y-4">
                 <select id="role" class="w-full bg-white/20 text-white border border-white/30 p-3 rounded-lg focus:ring-2 focus:ring-blue-400 outline-none">
                     <option value="" class="text-gray-800">-- Select Role --</option>
@@ -121,7 +113,6 @@
         </div>
     </div>
 
-    <!-- DASHBOARD - Baaki same hai -->
     <div id="dashboard" class="hidden min-h-screen p-4">
         <div class="max-w-7xl mx-auto">
             <nav class="glass rounded-2xl p-4 mb-6 flex justify-between items-center">
@@ -261,14 +252,17 @@
                 const adminSnap = await window.dbGet(adminRef);
                 if (!adminSnap.exists()) {
                     await window.dbSet(adminRef, { role: 'admin', username: 'admin', password: 'admin123', fullName: 'System Admin' });
+                    console.log('Admin created');
                 }
                 const guestRef = window.dbRef(window.db, 'users/guest');
                 const guestSnap = await window.dbGet(guestRef);
                 if (!guestSnap.exists()) {
                     await window.dbSet(guestRef, { role: 'student', username: 'guest', password: 'guest123', fullName: 'Demo Guest' });
+                    console.log('Guest created');
                 }
             } catch(e) {
                 console.log('Init error:', e);
+                showToast('Firebase connect nahi hua! Rules check karo', 'error');
             }
         }
         setTimeout(initDefaultUsers, 1500);
@@ -310,10 +304,10 @@
                         showToast("Galat Password ya Role! 🤔", 'error'); 
                     }
                 } else { 
-                    showToast("User nahi mila! Pehle admin se banao 📞", 'error'); 
+                    showToast("User nahi mila! Firebase me check karo 📞", 'error'); 
                 }
             } catch(e) {
-                showToast("Firebase error! Rules check karo 🔥", 'error');
+                showToast("Firebase error! Rules me '.read': true karo 🔥", 'error');
                 console.log(e);
             }
         }
@@ -378,4 +372,7 @@
             const roll = document.getElementById('roll').value;
             const course = document.getElementById('course').value; 
             const email = document.getElementById('email').value;
-            const editIndex = document.getEleme
+            const editIndex = document.getElementById('editIndex').value;
+            if(!name || !roll || !course) { 
+                showToast('Name, Roll No, Course zaruri hai 📚', 'error'); 
+              
