@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>P for Problem v2.0 | Professional SMS</title>
-    
+
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -27,42 +27,29 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
         body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b1120; color: #f8fafc; overflow: hidden; }
-        
-        .glass-panel {
-            background: var(--glassBg);
+     .glass-panel {
+            background: rgba(30, 41, 59, 0.6);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--glassBorder);
+            border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
         }
-        
-        .neon-text { color: #60a5fa; text-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
-        .neon-border { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
-        
-        .page-section { display: none; animation: fadeIn 0.3s ease-in-out; }
-        .active-page { display: block; }
-        
-        .nav-item.active { background: rgba(59, 130, 246, 0.15); border-left: 3px solid #3b82f6; color: #60a5fa; }
-        
+     .neon-text { color: #60a5fa; text-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+     .page-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+     .active-page { display: block; }
+     .nav-item.active { background: rgba(59, 130, 246, 0.15); border-left: 3px solid #3b82f6; color: #60a5fa; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* Custom Scrollbar for dark theme */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #475569; }
-
-        .student-only { display: none; }
-        .admin-only { display: none; }
-
-        /* Edit Mode Highlight */
-        .editable-active {
+     .student-only { display: none; }
+     .admin-only { display: none; }
+     .editable-active {
             background-color: rgba(59, 130, 246, 0.2);
             border: 1px dashed #3b82f6;
             padding: 2px 4px;
             border-radius: 4px;
             outline: none;
-            cursor: text;
         }
     </style>
 </head>
@@ -70,7 +57,7 @@
 
     <div id="login-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-deepBlue">
         <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        <div class="glass-panel p-10 rounded-2xl w-full max-w-md relative z-10 neon-border">
+        <div class="glass-panel p-10 rounded-2xl w-full max-w-md relative z-10">
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-bold neon-text mb-2">P for Problem</h1>
                 <p class="text-slate-400 text-sm">v2.0 Professional Portal</p>
@@ -85,11 +72,11 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm text-slate-300 mb-2">Roll Number / Admin ID</label>
-                    <input type="text" id="login-id" value="admin" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue transition-all">
+                    <input type="text" id="login-id" value="admin" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue">
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm text-slate-300 mb-2">Password</label>
-                    <input type="password" value="admin123" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue transition-all">
+                    <input type="password" id="login-pass" value="admin123" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue">
                 </div>
                 <button type="button" onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all transform hover:scale-105 active:scale-95">
                     Secure Login
@@ -109,12 +96,9 @@
             <nav class="mt-4 flex flex-col gap-1 px-2">
                 <button onclick="nav('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-home w-5"></i> Dashboard</button>
                 <button onclick="nav('students-list')" id="nav-students-list" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-users w-5"></i> Students List</button>
-                
                 <button onclick="nav('student-profile')" id="nav-student-profile" class="nav-item student-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-user-circle w-5"></i> My Profile</button>
-                
                 <button onclick="nav('add-student')" id="nav-add-student" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-user-plus w-5"></i> Add Student</button>
-                <button onclick="nav('marks-entry')" id="nav-marks-entry" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-edit w-5"></i> Marks Entry (Tally)</button>
-                
+                <button onclick="nav('marks-entry')" id="nav-marks-entry" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-edit w-5"></i> Marks Entry</button>
                 <button onclick="nav('reports')" id="nav-reports" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-file-pdf w-5"></i> Reports & PDF</button>
             </nav>
         </div>
@@ -126,28 +110,27 @@
     </aside>
 
     <main id="main-content" class="flex-1 h-full overflow-y-auto p-4 md:p-8 hidden relative">
-        
+
         <section id="page-dashboard" class="page-section active-page">
             <div class="flex justify-between items-center mb-8">
                 <div>
-                    <h2 class="text-2xl font-bold">Welcome back!</h2>
+                    <h2 class="text-2xl font-bold">Welcome back, <span id="welcome-name">Admin</span>!</h2>
                     <p class="text-slate-400 text-sm">Here is what's happening today.</p>
                 </div>
                 <div class="bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg text-sm font-semibold border border-blue-500/30">
                     <i class="fas fa-check-circle"></i> System Live
                 </div>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 cursor-default">
-                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-500 transform hover:-translate-y-2 transition-all">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-500">
                     <p class="text-slate-400 text-sm mb-1">Total Students</p>
-                    <h3 class="text-3xl font-bold text-white">1,024</h3>
+                    <h3 class="text-3xl font-bold text-white" id="dash-total-students">0</h3>
                 </div>
-                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500 transform hover:-translate-y-2 transition-all">
-                    <p class="text-slate-400 text-sm mb-1">Avg Institute Attendance</p>
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500">
+                    <p class="text-slate-400 text-sm mb-1">Avg Attendance</p>
                     <h3 class="text-3xl font-bold text-white">92%</h3>
                 </div>
-                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-500 transform hover:-translate-y-2 transition-all">
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-500">
                     <p class="text-slate-400 text-sm mb-1">Latest Notice</p>
                     <h3 class="text-lg font-bold mt-1 text-purple-400 truncate">Mid Term Exams Scheduled</h3>
                 </div>
@@ -155,20 +138,23 @@
         </section>
 
         <section id="page-students-list" class="page-section">
-            <h2 class="text-2xl font-bold mb-6">Class Directory</h2>
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Class Directory</h2>
+                <button onclick="nav('add-student')" class="admin-only bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg text-sm font-semibold">
+                    <i class="fas fa-plus mr-2"></i>Add Student
+                </button>
+            </div>
             <div class="glass-panel rounded-xl overflow-hidden shadow-lg">
-                <div class="p-4 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/30">
-                    <div class="flex gap-4">
-                        <select class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-sm outline-none cursor-pointer hover:border-neonBlue transition-colors">
-                            <option>Section A</option>
-                            <option>Section B</option>
-                        </select>
-                        <span class="text-sm text-slate-400 self-center">Showing students</span>
-                    </div>
+                <div class="p-4 border-b border-slate-700/50 bg-slate-800/30">
+                    <select id="section-filter" onchange="loadStudents()" class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-sm outline-none cursor-pointer">
+                        <option value="A">Section A</option>
+                        <option value="B">Section B</option>
+                        <option value="C">Section C</option>
+                    </select>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-800/80 text-slate-400 text-sm uppercase tracking-wider">
+                        <thead class="bg-slate-800/80 text-slate-400 text-sm uppercase">
                             <tr>
                                 <th class="p-4 font-medium">Roll No</th>
                                 <th class="p-4 font-medium">Student Name</th>
@@ -176,10 +162,32 @@
                                 <th class="p-4 font-medium">Action</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-700/30 text-sm" id="student-list-body">
-                            </tbody>
+                        <tbody class="divide-y divide-slate-700/30 text-sm" id="student-list-body"></tbody>
                     </table>
                 </div>
+            </div>
+        </section>
+
+        <section id="page-add-student" class="page-section">
+            <h2 class="text-2xl font-bold mb-6">Add New Student</h2>
+            <div class="glass-panel p-6 rounded-2xl max-w-2xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input id="sName" type="text" placeholder="Student Name" class="bg-white/10 text-white placeholder-blue-200 border-white/30 p-3 rounded-lg">
+                    <input id="sRoll" type="text" placeholder="Roll Number" class="bg-white/10 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg">
+                    <input id="sFName" type="text" placeholder="Father's Name" class="bg-white/10 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg">
+                    <select id="sSection" class="bg-white/10 text-white border border-white/30 p-3 rounded-lg">
+                        <option value="" class="text-gray-800">Select Section</option>
+                        <option value="A" class="text-gray-800">Section A</option>
+                        <option value="B" class="text-gray-800">Section B</option>
+                        <option value="C" class="text-gray-800">Section C</option>
+                    </select>
+                    <input id="sCourse" type="text" placeholder="Course (BCA/BTech)" class="bg-white/10 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg">
+                    <input id="sGmail" type="email" placeholder="Gmail" class="bg-white/10 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg">
+                    <input id="sCollege" type="text" placeholder="College Name" class="bg-white/10 text-white placeholder-blue-200 border border-white/30 p-3 rounded-lg md:col-span-2">
+                </div>
+                <button onclick="saveStudentData()" class="mt-6 w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold">
+                    Save Student 💾
+                </button>
             </div>
         </section>
 
@@ -187,115 +195,431 @@
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold">Student Biodata</h2>
                 <div class="flex gap-3">
-                    <button id="edit-btn" onclick="toggleEditMode()" class="admin-only bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded text-sm transition-all shadow hover:shadow-lg cursor-pointer flex items-center gap-2">
+                    <button id="edit-btn" onclick="toggleEditMode()" class="admin-only bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded text-sm flex items-center gap-2">
                         <i class="fas fa-edit"></i> Edit
                     </button>
-                    <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-semibold shadow-lg shadow-blue-500/20 transition-all transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2">
+                    <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-semibold flex items-center gap-2">
                         <i class="fas fa-download"></i> Marksheet PDF
                     </button>
                 </div>
-            </div>
-
-            <div class="glass-panel p-6 rounded-xl flex flex-col md:flex-row gap-6 items-start mb-6 border border-slate-700 hover:border-blue-500/30 transition-colors">
-                <div class="w-24 h-24 rounded-xl bg-slate-700 flex items-center justify-center text-3xl font-bold text-slate-400 shadow-inner">
-                    <span id="prof-init">R</span>
-                </div>
-                <div class="flex-1 grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-6 text-sm">
-                    <div>
-                        <p class="text-slate-500 mb-1"><i class="fas fa-user text-xs mr-1"></i> Full Name</p>
-                        <p class="font-semibold text-lg transition-all" id="prof-name">Rishabh Kumar</p>
+            <div id="pdf-content">
+                <div class="glass-panel p-6 rounded-xl flex flex-col md:flex-row gap-6 items-start mb-6">
+                    <div class="w-24 h-24 rounded-xl bg-slate-700 flex items-center justify-center text-3xl font-bold text-slate-400">
+                        <span id="prof-init">R</span>
                     </div>
-                    <div>
-                        <p class="text-slate-500 mb-1"><i class="fas fa-id-badge text-xs mr-1"></i> Roll Number</p>
-                        <p class="font-semibold text-lg text-neonBlue" id="prof-roll">101</p>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 mb-1"><i class="fas fa-chalkboard text-xs mr-1"></i> Section & Course</p>
-                        <p class="font-semibold" id="prof-sec">Section A • BCA</p>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 mb-1"><i class="fas fa-user-tie text-xs mr-1"></i> Father's Name</p>
-                        <p class="font-semibold transition-all" id="prof-fname">Rajesh Kumar</p>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 mb-1"><i class="fas fa-university text-xs mr-1"></i> College</p>
-                        <p class="font-semibold text-emerald-400" id="prof-col">ABC College</p>
-                    </div>
-                    <div>
-                        <p class="text-slate-500 mb-1"><i class="fas fa-envelope text-xs mr-1"></i> Email ID</p>
-                        <p class="font-semibold text-slate-300 transition-all" id="prof-mail">rishabh@gmail.com</p>
+                    <div class="flex-1 grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-6 text-sm">
+                        <div><p class="text-slate-500 mb-1">Full Name</p><p class="font-semibold text-lg" id="prof-name">Rishabh Kumar</p></div>
+                        <div><p class="text-slate-500 mb-1">Roll Number</p><p class="font-semibold text-lg text-neonBlue" id="prof-roll">101</p></div>
+                        <div><p class="text-slate-500 mb-1">Section & Course</p><p class="font-semibold" id="prof-sec">Section A • BCA</p></div>
+                        <div><p class="text-slate-500 mb-1">Father's Name</p><p class="font-semibold" id="prof-fname">Rajesh Kumar</p></div>
+                        <div><p class="text-slate-500 mb-1">College</p><p class="font-semibold text-emerald-400" id="prof-col">ABC College</p></div>
+                        <div><p class="text-slate-500 mb-1">Email ID</p><p class="font-semibold text-slate-300" id="prof-mail">rishabh@gmail.com</p></div>
                     </div>
                 </div>
-            </div>
-
-            <h3 class="text-lg font-bold mb-3 border-b border-slate-700 pb-2">Academic Record (Tally Type)</h3>
-            <div class="glass-panel rounded-xl overflow-hidden mb-6 shadow-lg">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-800/80 text-slate-300 border-b border-slate-600 uppercase tracking-wider text-xs">
-                        <tr>
-                            <th class="p-4">Subject Name</th>
-                            <th class="p-4 text-center">Max Marks</th>
-                            <th class="p-4 text-center">Obtained</th>
-                            <th class="p-4 text-right">Percentage</th>
-                        </tr>
-                    </thead>
-                    <tbody id="prof-marks-body" class="divide-y divide-slate-700/50">
-                        </tbody>
-                    <tfoot class="bg-blue-900/20 border-t border-blue-500/30 font-bold">
-                        <tr>
-                            <td class="p-4 text-neonBlue">GRAND TOTAL</td>
-                            <td class="p-4 text-center" id="prof-max">200</td>
-                            <td class="p-4 text-center text-emerald-400" id="prof-ob">163</td>
-                            <td class="p-4 text-right text-emerald-400" id="prof-perc">81.5%</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-
-            <div class="grid grid-cols-3 gap-4 cursor-default">
-                <div class="glass-panel p-4 rounded-lg text-center hover:bg-slate-800 transition-colors"><p class="text-xs text-slate-400">SGPA</p><h4 class="text-2xl font-bold text-white" id="prof-sgpa">8.5</h4></div>
-                <div class="glass-panel p-4 rounded-lg text-center hover:bg-slate-800 transition-colors"><p class="text-xs text-slate-400">CGPA</p><h4 class="text-2xl font-bold text-white" id="prof-cgpa">8.2</h4></div>
-                <div class="glass-panel p-4 rounded-lg text-center hover:bg-slate-800 transition-colors"><p class="text-xs text-slate-400">Attendance</p><h4 class="text-2xl font-bold text-emerald-400">92%</h4></div>
+                <h3 class="text-lg font-bold mb-3 border-b border-slate-700 pb-2">Academic Record</h3>
+                <div class="glass-panel rounded-xl overflow-hidden mb-6">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-800/80 text-slate-300 border-b border-slate-600 uppercase text-xs">
+                            <tr>
+                                <th class="p-4">Subject Name</th>
+                                <th class="p-4 text-center">Max Marks</th>
+                                <th class="p-4 text-center">Obtained</th>
+                                <th class="p-4 text-right">Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prof-marks-body" class="divide-y divide-slate-700/50"></tbody>
+                        <tfoot class="bg-blue-900/20 border-t border-blue-500/30 font-bold">
+                            <tr>
+                                <td class="p-4 text-neonBlue">GRAND TOTAL</td>
+                                <td class="p-4 text-center" id="prof-max">0</td>
+                                <td class="p-4 text-center text-emerald-400" id="prof-ob">0</td>
+                                <td class="p-4 text-right text-emerald-400" id="prof-perc">0%</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="glass-panel p-4 rounded-lg text-center"><p class="text-xs text-slate-400">SGPA</p><h4 class="text-2xl font-bold text-white" id="prof-sgpa">0</h4></div>
+                    <div class="glass-panel p-4 rounded-lg text-center"><p class="text-xs text-slate-400">CGPA</p><h4 class="text-2xl font-bold text-white" id="prof-cgpa">0</h4></div>
+                    <div class="glass-panel p-4 rounded-lg text-center"><p class="text-xs text-slate-400">Attendance</p><h4 class="text-2xl font-bold text-emerald-400">92%</h4></div>
+                </div>
             </div>
         </section>
-
-        <section id="page-marks-entry" class="page-section">
-            <h2 class="text-2xl font-bold mb-6">Tally Marks Register</h2>
-            <div class="glass-panel p-6 rounded-xl border border-blue-500/20 shadow-lg">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div>
-                        <label class="block text-sm text-slate-400 mb-1">Select Student Roll No.</label>
-                        <select class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm outline-none cursor-pointer hover:border-blue-500 transition-colors">
-                            <option>101 - Rishabh Kumar</option>
-                            <option>102 - Amit Singh</option>
-                        </select>
-                    </div>
+                <section id="page-marks-entry" class="page-section">
+            <h2 class="text-2xl font-bold mb-6">Marks Entry System</h2>
+            <div class="glass-panel p-6 rounded-xl">
+                <div class="mb-6">
+                    <label class="block text-sm text-slate-400 mb-1">Select Student Roll No.</label>
+                    <select id="selectStudentRoll" onchange="loadStudentMarks()" class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm outline-none cursor-pointer md:w-1/2">
+                        <option value="">-- Select Roll No --</option>
+                    </select>
                 </div>
-
-                <div class="border border-slate-700 rounded-lg p-5 bg-slate-800/30 mb-4 hover:border-blue-500/50 transition-colors">
+                <div class="border border-slate-700 rounded-lg p-5 bg-slate-800/30 mb-4">
                     <h4 class="text-sm font-semibold text-neonBlue mb-3">Add Subject Marks</h4>
                     <div class="flex gap-3 items-end flex-wrap">
-                        <div class="flex-1 min-w-[200px]"><label class="block text-xs mb-1 text-slate-400">Subject Name</label><input type="text" placeholder="e.g. Physics" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm focus:border-blue-500 outline-none transition-colors"></div>
-                        <div class="w-24"><label class="block text-xs mb-1 text-slate-400">Max</label><input type="number" value="100" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm focus:border-blue-500 outline-none transition-colors"></div>
-                        <div class="w-24"><label class="block text-xs mb-1 text-slate-400">Obtained</label><input type="number" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm focus:border-blue-500 outline-none transition-colors"></div>
-                        <button class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2.5 rounded text-sm font-bold shadow-lg transition-all transform hover:scale-105 active:scale-95 cursor-pointer">Add</button>
+                        <div class="flex-1 min-w-[200px]"><label class="block text-xs mb-1 text-slate-400">Subject Name</label><input id="subjectName" type="text" placeholder="e.g. Physics" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm"></div>
+                        <div class="w-24"><label class="block text-xs mb-1 text-slate-400">Max</label><input id="subjectMax" type="number" value="100" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm"></div>
+                        <div class="w-24"><label class="block text-xs mb-1 text-slate-400">Obtained</label><input id="subjectObt" type="number" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm"></div>
+                        <button onclick="addSubject()" class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2.5 rounded text-sm font-bold">Add</button>
                     </div>
-                </div>
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-800/80 text-slate-300 border-b border-slate-600 uppercase text-xs">
+                        <tr>
+                            <th class="p-4">Subject</th>
+                            <th class="p-4 text-center">Max</th>
+                            <th class="p-4 text-center">Obtained</th>
+                            <th class="p-4 text-center">%</th>
+                            <th class="p-4 text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="marksTableBody" class="divide-y divide-slate-700/50"></tbody>
+                </table>
+                <button onclick="saveAllMarks()" class="mt-6 w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold">
+                    Save All Marks 💾
+                </button>
             </div>
         </section>
 
         <section id="page-reports" class="page-section">
             <h2 class="text-2xl font-bold mb-6">Generate Official Reports</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass-panel p-8 rounded-xl text-center border-2 border-dashed border-slate-600 hover:border-blue-500 transition-colors group cursor-pointer" onclick="nav('student-profile')">
-                    <i class="fas fa-file-pdf text-5xl text-red-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                <div class="glass-panel p-8 rounded-xl text-center border-2 border-dashed border-slate-600 hover:border-blue-500 transition-colors cursor-pointer" onclick="generatePDF()">
+                    <i class="fas fa-file-pdf text-5xl text-red-400 mb-4"></i>
                     <h3 class="text-xl font-bold mb-2">Student Marksheet</h3>
-                    <p class="text-sm text-slate-400 mb-6">Download strictly formatted academic record for current profile.</p>
-                    <button class="bg-blue-600 hover:bg-blue-500 px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg transition-all">Go to Profile to Print</button>
+                    <p class="text-sm text-slate-400 mb-6">Download formatted academic record for current profile.</p>
+                    <button class="bg-blue-600 hover:bg-blue-500 px-6 py-2.5 rounded-lg text-sm font-bold">Download PDF</button>
                 </div>
             </div>
         </section>
+    </main>
 
-        <div id="pdf-wrapper" style="display: none; position: absolute; left: -9999px;">
-            <div id="print-template" style="width: 800px; padding: 40px; background: white; color: black; font-family: Arial, sans-serif;">
-                <div style="text-align: center; border-bottom: 3px solid #1e3a8a; padding-bottom: 20px; mar
+    <script>
+        let currentUserRole = '';
+        let currentStudentRoll = '';
+        let isEditMode = false;
+        let currentMarks = {};
+        let studentsDB = {
+            "101": {
+                name: "Rishabh Kumar", roll: "101", fName: "Rajesh Kumar", section: "A",
+                college: "ABC College", gmail: "rishabh@gmail.com", course: "BCA",
+                marks: {
+                    "Mathematics": { max: 100, obtained: 85 },
+                    "Physics": { max: 100, obtained: 78 },
+                    "Chemistry": { max: 100, obtained: 92 }
+                },
+                sgpa: 8.5, cgpa: 8.2
+            },
+            "102": {
+                name: "Amit Singh", roll: "102", fName: "Suresh Singh", section: "A",
+                college: "ABC College", gmail: "amit@gmail.com", course: "BCA",
+                marks: { "Mathematics": { max: 100, obtained: 75 } },
+                sgpa: 7.5, cgpa: 7.2
+            },
+            "103": {
+                name: "Priya Sharma", roll: "103", fName: "Ramesh Sharma", section: "B",
+                college: "ABC College", gmail: "priya@gmail.com", course: "BTech",
+                marks: {},
+                sgpa: 0, cgpa: 0
+            }
+        };
+
+        function handleLogin() {
+            const role = document.getElementById('login-role').value;
+            const id = document.getElementById('login-id').value;
+            const pass = document.getElementById('login-pass').value;
+
+            if(!id ||!pass) {
+                alert('ID aur Password dalo');
+                return;
+            }
+
+            if(role === 'admin' && (id!== 'admin' || pass!== 'admin123')) {
+                alert('Galat Admin credentials');
+                return;
+            }
+
+            if(role === 'student' &&!studentsDB[id]) {
+                alert('Student Roll No. nahi mila');
+                return;
+            }
+
+            currentUserRole = role;
+            if(role === 'student') currentStudentRoll = id;
+
+            document.getElementById('login-overlay').style.display = 'none';
+            document.getElementById('sidebar').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('role-badge').innerText = role;
+            document.getElementById('welcome-name').innerText = role === 'admin'? 'Admin' : studentsDB[id]?.name || id;
+
+            if(role === 'admin') {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'flex');
+                document.querySelectorAll('.student-only').forEach(el => el.style.display = 'none');
+                nav('dashboard');
+            } else {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.student-only').forEach(el => el.style.display = 'flex');
+                loadStudentProfile(id);
+                nav('student-profile');
+            }
+
+            loadStudents();
+            updateDashboard();
+        }
+
+        function logout() {
+            document.getElementById('login-overlay').style.display = 'flex';
+            document.getElementById('sidebar').classList.add('hidden');
+            document.getElementById('main-content').classList.add('hidden');
+            document.getElementById('login-id').value = 'admin';
+            document.getElementById('login-pass').value = 'admin123';
+        }
+
+        function nav(pageName) {
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.remove('active-page');
+            });
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById(`page-${pageName}`).classList.add('active-page');
+            document.getElementById(`nav-${pageName}`).classList.add('active');
+
+            if(pageName === 'students-list') loadStudents();
+            if(pageName === 'marks-entry') loadStudentsDropdown();
+        }
+
+        function updateDashboard() {
+            document.getElementById('dash-total-students').innerText = Object.keys(studentsDB).length;
+        }
+
+        function loadStudents() {
+            const tbody = document.getElementById('student-list-body');
+            const section = document.getElementById('section-filter')?.value || 'A';
+            tbody.innerHTML = '';
+
+            Object.values(studentsDB).filter(s => s.section === section).forEach(s => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-800/50 transition-colors">
+                        <td class="p-4 font-medium text-neonBlue">${s.roll}</td>
+                        <td class="p-4">${s.name}</td>
+                        <td class="p-4">${s.section}</td>
+                        <td class="p-4">
+                            <button onclick="viewProfile('${s.roll}')" class="text-blue-400 hover:text-blue-300 text-xs font-semibold mr-3">
+                                <i class="fas fa-eye mr-1"></i> View
+                            </button>
+                            ${currentUserRole === 'admin'? `
+                            <button onclick="deleteStudent('${s.roll}')" class="text-red-400 hover:text-red-300 text-xs font-semibold">
+                                <i class="fas fa-trash mr-1"></i> Delete
+                            </button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+            updateDashboard();
+        }
+
+        function viewProfile(roll) {
+            loadStudentProfile(roll);
+            nav('student-profile');
+        }
+
+        function saveStudentData() {
+            const data = {
+                name: document.getElementById('sName').value,
+                roll: document.getElementById('sRoll').value,
+                fName: document.getElementById('sFName').value,
+                section: document.getElementById('sSection').value,
+                course: document.getElementById('sCourse').value,
+                gmail: document.getElementById('sGmail').value,
+                college: document.getElementById('sCollege').value,
+                marks: {},
+                sgpa: 0,
+                cgpa: 0
+            };
+
+            if(!data.name ||!data.roll ||!data.section) {
+                alert('Name, Roll, Section required');
+                return;
+            }
+
+            if(studentsDB[data.roll]) {
+                alert('Roll Number already exists');
+                return;
+            }
+
+            studentsDB[data.roll] = data;
+            alert('Student Added Successfully! 🎉');
+            document.querySelectorAll('#page-add-student input, #page-add-student select').forEach(el => el.value = '');
+            loadStudents();
+            nav('students-list');
+        }
+
+        function deleteStudent(roll) {
+            if(confirm(`Delete student ${roll}?`)) {
+                delete studentsDB[roll];
+                loadStudents();
+                alert('Student deleted');
+            }
+        }
+
+        function loadStudentProfile(roll) {
+            const s = studentsDB[roll];
+            if(!s) return alert('Student not found');
+
+            currentStudentRoll = roll;
+            document.getElementById('prof-name').innerText = s.name;
+            document.getElementById('prof-roll').innerText = s.roll;
+            document.getElementById('prof-sec').innerText = `Section ${s.section} • ${s.course}`;
+            document.getElementById('prof-fname').innerText = s.fName;
+            document.getElementById('prof-col').innerText = s.college;
+            document.getElementById('prof-mail').innerText = s.gmail;
+            document.getElementById('prof-init').innerText = s.name[0];
+
+            const tbody = document.getElementById('prof-marks-body');
+            tbody.innerHTML = '';
+            let totalMax = 0, totalObt = 0;
+
+            Object.keys(s.marks || {}).forEach(sub => {
+                const m = s.marks[sub];
+                const percent = ((m.obtained / m.max) * 100).toFixed(1);
+                totalMax += m.max;
+                totalObt += m.obtained;
+                tbody.innerHTML += `
+                    <tr class="border-b border-white/10">
+                        <td class="p-3">${sub}</td>
+                        <td class="p-3 text-center">${m.max}</td>
+                        <td class="p-3 text-center">${m.obtained}</td>
+                        <td class="p-3 text-right">${percent}%</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('prof-max').innerText = totalMax;
+            document.getElementById('prof-ob').innerText = totalObt;
+            document.getElementById('prof-perc').innerText = totalMax? ((totalObt/totalMax)*100).toFixed(1) + '%' : '0%';
+            document.getElementById('prof-sgpa').innerText = s.sgpa || 0;
+            document.getElementById('prof-cgpa').innerText = s.cgpa || 0;
+        }
+
+        function toggleEditMode() {
+            isEditMode =!isEditMode;
+            const editBtn = document.getElementById('edit-btn');
+            const fields = ['prof-name', 'prof-fname', 'prof-mail'];
+
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                if(isEditMode) {
+                    el.contentEditable = true;
+                    el.classList.add('editable-active');
+                    editBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+                } else {
+                    el.contentEditable = false;
+                    el.classList.remove('editable-active');
+                    editBtn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+                    studentsDB[currentStudentRoll].name = document.getElementById('prof-name').innerText;
+                    studentsDB[currentStudentRoll].fName = document.getElementById('prof-fname').innerText;
+                    studentsDB[currentStudentRoll].gmail = document.getElementById('prof-mail').innerText;
+                    alert('Changes Saved!');
+                    loadStudents();
+                }
+            });
+        }
+
+        function loadStudentsDropdown() {
+            const select = document.getElementById('selectStudentRoll');
+            select.innerHTML = '<option value="">-- Select Roll No --</option>';
+            Object.values(studentsDB).forEach(s => {
+                select.innerHTML += `<option value="${s.roll}">${s.roll} - ${s.name}</option>`;
+            });
+        }
+
+        function loadStudentMarks() {
+            const roll = document.getElementById('selectStudentRoll').value;
+            if(!roll) return;
+            currentStudentRoll = roll;
+            currentMarks = {...studentsDB[roll].marks} || {};
+            renderMarksTable();
+        }
+
+        function addSubject() {
+            const name = document.getElementById('subjectName').value;
+            const max = parseInt(document.getElementById('subjectMax').value);
+            const obt = parseInt(document.getElementById('subjectObt').value) || 0;
+            if(!name ||!max) return alert('Subject name aur Max marks dalo');
+
+            currentMarks[name] = { max: max, obtained: obt };
+            renderMarksTable();
+            document.getElementById('subjectName').value = '';
+            document.getElementById('subjectMax').value = '100';
+            document.getElementById('subjectObt').value = '';
+        }
+
+        function renderMarksTable() {
+            const tbody = document.getElementById('marksTableBody');
+            tbody.innerHTML = '';
+
+            Object.keys(currentMarks).forEach(sub => {
+                const m = currentMarks[sub];
+                const percent = ((m.obtained / m.max) * 100).toFixed(1);
+                tbody.innerHTML += `
+                    <tr class="border-b border-white/10">
+                        <td class="p-3">${sub}</td>
+                        <td class="p-3 text-center">${m.max}</td>
+                        <td class="p-3 text-center">
+                            <input type="number" value="${m.obtained}" onchange="updateMark('${sub}', this.value)"
+                                   class="bg-white/10 text-white border border-white/30 p-1 rounded w-20 text-center">
+                        </td>
+                        <td class="p-3 text-center">${percent}%</td>
+                        <td class="p-3 text-center">
+                            <button onclick="deleteSubject('${sub}')" class="text-red-400 hover:text-red-300">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateMark(subject, value) {
+            currentMarks[subject].obtained = parseInt(value) || 0;
+            renderMarksTable();
+        }
+
+        function deleteSubject(subject) {
+            delete currentMarks[subject];
+            renderMarksTable();
+        }
+
+        function saveAllMarks() {
+            if(!currentStudentRoll) return alert('Student select karo');
+
+            studentsDB[currentStudentRoll].marks = currentMarks;
+            let totalMax = 0, totalObt = 0;
+            Object.values(currentMarks).forEach(m => {
+                totalMax += m.max;
+                totalObt += m.obtained;
+            });
+            studentsDB[currentStudentRoll].sgpa = totalMax? ((totalObt/totalMax)*10).toFixed(1) : 0;
+            studentsDB[currentStudentRoll].cgpa = studentsDB[currentStudentRoll].sgpa;
+
+            alert('Marks Saved Successfully! ✅');
+            loadStudentProfile(currentStudentRoll);
+        }
+
+        function generatePDF() {
+            const element = document.getElementById('pdf-content');
+            const opt = {
+                margin: 10,
+                filename: `Marksheet_${currentStudentRoll}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        window.onload = function() {
+            loadStudents();
+        }
+    </script>
+</body>
+</html>
