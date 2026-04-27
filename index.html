@@ -3,267 +3,300 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduVerse - P for Problem Edition</title>
+    <title>EduVerse Pro | Next-Gen Portal</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
-    
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, set, get, push, remove, update, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAnajb7aYGO0KWKSWT5SJZnpT0-lPoESnw",
-            authDomain: "student-management-37282.firebaseapp.com",
-            databaseURL: "https://student-management-37282-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "student-management-37282",
-            storageBucket: "student-management-37282.firebasestorage.app",
-            messagingSenderId: "760085295267",
-            appId: "1:760085295267:web:cd7420ce5e2885f005cf16"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // Exporting to Global for local functions
-        window.db = db; window.dbRef = ref; window.dbSet = set; window.dbGet = get;
-        window.dbUpdate = update; window.onValue = onValue; window.dbPush = push;
-    </script>
 
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
-        * { font-family: 'Poppins', sans-serif; transition: all 0.2s ease-in-out; }
-        .bg-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #db2777 100%); background-attachment: fixed; }
-        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .floating { animation: float 3s ease-in-out infinite; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-        .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
-        .dot-present { background-color: #22c55e; } .dot-absent { background-color: #ef4444; } .dot-none { background-color: #e5e7eb; }
+        @import url('https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap');
+
+        :root {
+            --glass: rgba(255, 255, 255, 0.07);
+            --border: rgba(255, 255, 255, 0.15);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #050505;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .hero-font { font-family: 'Syncopate', sans-serif; }
+
+        /* Advanced Glassmorphism */
+        .glass-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .glass-card:hover {
+            border: 1px solid rgba(124, 58, 237, 0.5);
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.3);
+            transform: scale(1.02);
+        }
+
+        #vanta-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .neo-btn {
+            background: linear-gradient(90deg, #7c3aed, #db2777);
+            position: relative;
+            overflow: hidden;
+            transition: 0.3s;
+        }
+
+        .neo-btn::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: 0.5s;
+        }
+
+        .neo-btn:hover::after { left: 100%; }
+
+        /* Table Styling */
+        tr:hover td { background: rgba(255,255,255,0.03); }
+        .attendance-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+            cursor: pointer; transition: 0.3s;
+        }
+        .present { background: #10b981; box-shadow: 0 0 10px #10b981; }
+        .absent { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
+        .empty { background: rgba(255,255,255,0.2); }
     </style>
 </head>
-<body class="bg-gradient min-h-screen text-white">
+<body>
 
-    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-md w-full glass rounded-3xl p-8 shadow-2xl">
-            <div class="text-center mb-8">
-                <div class="bg-white/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 floating">
-                    <i data-lucide="bot" class="w-12 h-12 text-blue-400"></i>
+    <div id="vanta-bg"></div>
+
+    <section id="loginSection" class="min-h-screen flex items-center justify-center p-6">
+        <div class="glass-card max-w-lg w-full p-10 text-center" data-aos="zoom-in">
+            <div class="mb-6 relative">
+                <div class="w-24 h-24 bg-gradient-to-tr from-purple-600 to-pink-600 rounded-full mx-auto flex items-center justify-center shadow-2xl">
+                    <i data-lucide="shield-check" class="w-12 h-12 text-white"></i>
                 </div>
-                <h1 class="text-4xl font-bold">EduVerse</h1>
-                <p class="text-blue-200 mt-2" id="userLiveCounter">Connecting to DB...</p>
             </div>
+            <h1 class="hero-font text-3xl font-bold mb-2 tracking-tighter">EDUVERSE <span class="text-pink-500">PRO</span></h1>
+            <p class="text-gray-400 mb-8">Next-Gen Intelligent Student Management</p>
+            
             <div class="space-y-4">
-                <select id="loginRole" class="w-full bg-white/10 p-3 rounded-xl border border-white/20 outline-none">
-                    <option value="admin" class="text-black">Admin</option>
-                    <option value="student" class="text-black">Student</option>
-                    <option value="parent" class="text-black">Parent</option>
-                </select>
-                <input id="userIn" type="text" placeholder="Username" class="w-full bg-white/10 p-3 rounded-xl border border-white/20">
-                <input id="passIn" type="password" placeholder="Password" class="w-full bg-white/10 p-3 rounded-xl border border-white/20">
-                <button onclick="handleAuth()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold shadow-lg">Enter Portal 🚀</button>
+                <input type="text" id="user" placeholder="Access ID" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl focus:border-purple-500 outline-none transition">
+                <input type="password" id="pass" placeholder="Security Token" class="w-full bg-black/40 border border-white/10 p-4 rounded-xl focus:border-purple-500 outline-none transition">
+                <button onclick="unlockDashboard()" class="neo-btn w-full py-4 rounded-xl font-bold uppercase tracking-widest shadow-lg">Initialize System</button>
             </div>
+            <p class="mt-6 text-xs text-gray-500">Status: <span class="text-green-500">Terminal Encrypted</span></p>
         </div>
-    </div>
+    </section>
 
-    <div id="dashboard" class="hidden p-4 md:p-8">
-        <div class="max-w-7xl mx-auto">
-            <nav class="glass rounded-2xl p-4 mb-8 flex justify-between items-center">
-                <div class="flex items-center gap-3">
-                    <i data-lucide="layout-dashboard" class="text-blue-400"></i>
-                    <h2 class="text-xl font-bold">EduVerse <span id="roleBadge" class="text-xs bg-blue-500 px-2 py-1 rounded-full ml-2"></span></h2>
+    <main id="mainContent" class="hidden min-h-screen p-4 lg:p-8">
+        <div class="max-w-[1400px] mx-auto">
+            
+            <header class="glass-card p-5 mb-8 flex justify-between items-center" data-aos="fade-down">
+                <div class="flex items-center gap-4">
+                    <div class="bg-purple-600/20 p-2 rounded-lg border border-purple-500/50">
+                        <i data-lucide="cpu" class="text-purple-400"></i>
+                    </div>
+                    <h2 class="hero-font font-bold">CORE_SYSTEM</h2>
                 </div>
-                <button onclick="location.reload()" class="bg-red-500/20 hover:bg-red-500 text-xs px-4 py-2 rounded-lg">Logout</button>
-            </nav>
+                <div class="flex items-center gap-6">
+                    <div class="hidden md:block text-right">
+                        <p class="text-xs text-gray-400">Authorized User</p>
+                        <p class="text-sm font-bold">Admin_Rishabh</p>
+                    </div>
+                    <button onclick="location.reload()" class="p-3 bg-red-500/10 border border-red-500/30 rounded-xl hover:bg-red-500 transition">
+                        <i data-lucide="power" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </header>
 
-            <div id="announcementBox" class="bg-yellow-500/20 border border-yellow-500/30 p-4 rounded-xl mb-8 hidden flex items-center gap-3">
-                <i data-lucide="megaphone" class="text-yellow-400"></i>
-                <marquee id="msgText" class="font-medium"></marquee>
-            </div>
-
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div class="glass p-6 rounded-2xl text-center">
-                    <p class="text-blue-200 text-sm">Total Students</p>
-                    <h3 class="text-3xl font-bold" id="statTotal">0</h3>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="100">
+                    <p class="text-xs font-bold text-purple-400 uppercase mb-2">Total Node_Count</p>
+                    <h3 class="text-4xl font-extrabold tracking-tighter">1,248</h3>
                 </div>
-                <div class="glass p-6 rounded-2xl text-center">
-                    <p class="text-green-200 text-sm">Present Today</p>
-                    <h3 class="text-3xl font-bold" id="statPresent">0</h3>
+                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="200">
+                    <p class="text-xs font-bold text-pink-400 uppercase mb-2">Active_Now</p>
+                    <h3 class="text-4xl font-extrabold tracking-tighter">84%</h3>
                 </div>
-                <div class="glass p-6 rounded-2xl text-center">
-                    <p class="text-purple-200 text-sm">Avg CGPA</p>
-                    <h3 class="text-3xl font-bold" id="statCGPA">0.0</h3>
+                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="300">
+                    <p class="text-xs font-bold text-blue-400 uppercase mb-2">System_Avg_GPA</p>
+                    <h3 class="text-4xl font-extrabold tracking-tighter">9.2</h3>
                 </div>
-                <div class="glass p-6 rounded-2xl text-center">
-                    <p class="text-yellow-200 text-sm">Top Scorer</p>
-                    <h3 class="text-3xl font-bold text-lg" id="statTop">-</h3>
+                <div class="glass-card p-6" data-aos="fade-up" data-aos-delay="400">
+                    <p class="text-xs font-bold text-orange-400 uppercase mb-2">Leader_ID</p>
+                    <h3 class="text-xl font-extrabold tracking-tighter truncate">ARYAN_01</h3>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                <div class="lg:col-span-2 glass p-6 rounded-3xl">
-                    <h3 class="mb-4 font-bold flex items-center gap-2"><i data-lucide="bar-chart"></i> Attendance Trend</h3>
-                    <canvas id="attChart" height="150"></canvas>
+                <div class="lg:col-span-2 glass-card p-8" data-aos="zoom-in-right">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="hero-font text-sm">Attendance_Telemetry</h3>
+                        <div class="flex gap-2">
+                            <span class="w-3 h-3 rounded-full bg-purple-500"></span>
+                            <span class="w-3 h-3 rounded-full bg-pink-500"></span>
+                        </div>
+                    </div>
+                    <canvas id="mainChart" height="120"></canvas>
                 </div>
-                <div class="glass p-6 rounded-3xl">
-                    <h3 class="mb-4 font-bold flex items-center gap-2"><i data-lucide="trophy"></i> Leaderboard</h3>
-                    <div id="leaderList" class="space-y-4"></div>
+                
+                <div class="glass-card p-8" data-aos="zoom-in-left">
+                    <h3 class="hero-font text-sm mb-6">Top_Performers</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-yellow-500/20 border border-yellow-500/50 flex items-center justify-center text-yellow-500 font-bold">1</div>
+                                <div><p class="font-bold">Rishabh Singh</p><p class="text-xs text-gray-500">CSE_6A</p></div>
+                            </div>
+                            <div class="text-right"><p class="font-bold text-purple-400">9.8</p></div>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-white/5 pb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-gray-400/20 border border-gray-400/50 flex items-center justify-center text-gray-400 font-bold">2</div>
+                                <div><p class="font-bold">Aprajita</p><p class="text-xs text-gray-500">CSE_6B</p></div>
+                            </div>
+                            <div class="text-right"><p class="font-bold text-purple-400">9.6</p></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="glass p-6 rounded-3xl overflow-hidden">
-                <div class="flex flex-col md:flex-row justify-between mb-6 gap-4">
-                    <input id="search" onkeyup="renderTable()" type="text" placeholder="Search roll or name..." class="bg-white/10 p-2 rounded-lg border border-white/20 w-full md:w-64">
-                    <div class="flex gap-2">
-                        <button id="adminOnlyBtn" onclick="toggleAddModal()" class="bg-blue-600 px-4 py-2 rounded-lg text-sm hidden">+ Add Student</button>
-                        <button onclick="exportPDF()" class="bg-white/10 px-4 py-2 rounded-lg text-sm">Download PDF</button>
+            <div class="glass-card p-8" data-aos="fade-up">
+                <div class="flex flex-col md:flex-row justify-between mb-8 gap-4">
+                    <h3 class="hero-font text-sm flex items-center gap-2">
+                        <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> Live_Registry
+                    </h3>
+                    <div class="flex gap-4">
+                        <input type="text" placeholder="Filter node..." class="bg-white/5 border border-white/10 px-4 py-2 rounded-xl text-sm focus:border-purple-500 outline-none">
+                        <button class="bg-purple-600 px-6 py-2 rounded-xl text-xs font-bold uppercase tracking-widest hover:shadow-[0_0_15px_rgba(124,58,237,0.5)]">Export_Log</button>
                     </div>
                 </div>
+                
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left">
-                        <thead class="bg-white/5 text-blue-200 uppercase text-xs">
-                            <tr>
-                                <th class="p-4">Student Info</th>
-                                <th class="p-4">Section</th>
-                                <th class="p-4">CGPA</th>
-                                <th class="p-4">Weekly Attendance (M-S)</th>
-                                <th id="actionCol" class="p-4 hidden">Action</th>
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-gray-500 text-xs uppercase tracking-widest border-b border-white/10">
+                                <th class="p-4 text-left">Node_Label</th>
+                                <th class="p-4 text-left">Sector</th>
+                                <th class="p-4 text-left">Efficiency_Rate</th>
+                                <th class="p-4 text-left">Weekly_Status</th>
+                                <th class="p-4 text-right">Matrix_Ops</th>
                             </tr>
                         </thead>
-                        <tbody id="studentTableBody"></tbody>
+                        <tbody class="text-sm">
+                            <tr class="border-b border-white/5">
+                                <td class="p-4">
+                                    <p class="font-bold">Arnav Sharma</p>
+                                    <p class="text-xs text-gray-500">ID: #00452</p>
+                                </td>
+                                <td class="p-4 text-gray-400">Section B</td>
+                                <td class="p-4"><span class="px-3 py-1 bg-green-500/10 text-green-500 border border-green-500/20 rounded-full text-xs">8.9 CGPA</span></td>
+                                <td class="p-4">
+                                    <div class="flex gap-2">
+                                        <div class="attendance-dot present"></div>
+                                        <div class="attendance-dot present"></div>
+                                        <div class="attendance-dot absent"></div>
+                                        <div class="attendance-dot present"></div>
+                                        <div class="attendance-dot empty"></div>
+                                    </div>
+                                </td>
+                                <td class="p-4 text-right">
+                                    <button class="text-gray-500 hover:text-white transition"><i data-lucide="more-horizontal"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div id="toast" class="fixed bottom-10 right-10 bg-green-600 p-4 rounded-xl shadow-2xl hidden z-50"></div>
+    </main>
 
     <script>
-        let currentRole = '';
-        let allStudents = [];
-        let chartInstance = null;
+        // Initialize 3D Vanta Background
+        VANTA.WAVES({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x050505,
+            shininess: 35.00,
+            waveHeight: 20.00,
+            waveSpeed: 0.50,
+            zoom: 0.8
+        });
 
-        // Initialize Lucide
+        // Initialize AOS
+        AOS.init({ duration: 1000, once: true });
         lucide.createIcons();
 
-        // 1. Live User Counter
-        function syncMeta() {
-            onValue(dbRef(db, 'students'), (snap) => {
-                const data = snap.val();
-                const count = data ? Object.keys(data).length : 0;
-                document.getElementById('userLiveCounter').innerText = `${count} Users Active`;
-                allStudents = data ? Object.values(data) : [];
-                if(currentRole) updateDashboard();
-            });
-        }
-        setTimeout(syncMeta, 1000);
-
-        // 2. Authentication Logic
-        function handleAuth() {
-            const user = document.getElementById('userIn').value;
-            const pass = document.getElementById('passIn').value;
-            const role = document.getElementById('loginRole').value;
-
-            // Simple demo logic as per roadmap
-            if((role === 'admin' && user === 'admin' && pass === 'admin123') || (user === 'guest')) {
-                currentRole = role;
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                document.getElementById('roleBadge').innerText = role.toUpperCase();
-                if(role === 'admin') {
-                    document.getElementById('adminOnlyBtn').classList.remove('hidden');
-                    document.getElementById('actionCol').classList.remove('hidden');
-                }
-                updateDashboard();
+        // Auth Mockup
+        function unlockDashboard() {
+            const user = document.getElementById('user').value;
+            if(user === 'admin') {
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+                initChart();
+                AOS.refresh();
             } else {
-                alert("Galat password hai bhai!");
+                alert("ACCESS DENIED: Unauthorized Identity.");
             }
         }
 
-        // 3. Update Dashboard Stats & Charts
-        function updateDashboard() {
-            document.getElementById('statTotal').innerText = allStudents.length;
-            
-            // Calc Top Scorer
-            if(allStudents.length > 0) {
-                const top = [...allStudents].sort((a,b) => b.cgpa - a.cgpa)[0];
-                document.getElementById('statTop').innerText = top.name;
-                document.getElementById('statCGPA').innerText = (allStudents.reduce((acc, s) => acc + parseFloat(s.cgpa), 0) / allStudents.length).toFixed(2);
-                
-                // Render Leaderboard
-                const leaders = [...allStudents].sort((a,b) => b.cgpa - a.cgpa).slice(0,3);
-                document.getElementById('leaderList').innerHTML = leaders.map((s, i) => `
-                    <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10">
-                        <span class="flex items-center gap-2"><b>#${i+1}</b> ${s.name}</span>
-                        <span class="text-yellow-400 font-bold">${s.cgpa}</span>
-                    </div>
-                `).join('');
-            }
-            renderTable();
-            initChart();
-        }
-
-        // 4. Render Student Table & Attendance Dots
-        function renderTable() {
-            const query = document.getElementById('search').value.toLowerCase();
-            const tbody = document.getElementById('studentTableBody');
-            tbody.innerHTML = '';
-
-            allStudents.filter(s => s.name.toLowerCase().includes(query) || s.roll.includes(query)).forEach(s => {
-                const row = document.createElement('tr');
-                row.className = "border-b border-white/5 hover:bg-white/5";
-                row.innerHTML = `
-                    <td class="p-4">
-                        <div class="font-bold">${s.name}</div>
-                        <div class="text-xs text-blue-300">${s.roll}</div>
-                    </td>
-                    <td class="p-4">${s.section || 'A'}</td>
-                    <td class="p-4"><span class="bg-blue-500/20 px-2 py-1 rounded text-sm">${s.cgpa}</span></td>
-                    <td class="p-4">
-                        <div class="flex gap-2">
-                            ${[1,2,3,4,5,6,7].map(day => `<span onclick="cycleAttendance('${s.roll}', ${day})" class="dot dot-none"></span>`).join('')}
-                        </div>
-                    </td>
-                    ${currentRole === 'admin' ? `<td class="p-4"><button class="text-red-400 text-xs">Delete</button></td>` : ''}
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // 5. Chart.js Initialization
+        // Chart with Gradient
         function initChart() {
-            const ctx = document.getElementById('attChart').getContext('2d');
-            if(chartInstance) chartInstance.destroy();
-            chartInstance = new Chart(ctx, {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(124, 58, 237, 0.4)');
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+            new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    labels: ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'],
                     datasets: [{
-                        label: 'Attendance %',
-                        data: [65, 78, 40, 85, 92, 30, 20],
+                        label: 'Network Activity',
+                        data: [65, 80, 72, 95, 88, 40, 30],
                         borderColor: '#7c3aed',
-                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: '#db2777',
+                        tension: 0.5,
                         fill: true,
-                        backgroundColor: 'rgba(124, 58, 237, 0.1)'
+                        backgroundColor: gradient
                     }]
                 },
-                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#fff' } } } }
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { display: false },
+                        x: { grid: { display: false }, ticks: { color: '#555' } }
+                    }
+                }
             });
         }
-
-        // 6. PDF Export
-        window.exportPDF = function() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text("EduVerse Student Report", 10, 10);
-            doc.autoTable({ html: '#studentTableBody' });
-            doc.save('Student_Data.pdf');
-        }
-
-        window.handleAuth = handleAuth;
-        window.renderTable = renderTable;
     </script>
 </body>
 </html>
