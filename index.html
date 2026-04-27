@@ -3,140 +3,312 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Team P for Problem | Student Management</title>
+    <title>P for Problem - Professional SMS</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        @keyframes swing {
-            0% { transform: rotate(-10deg); }
-            50% { transform: rotate(10deg); }
-            100% { transform: rotate(-10deg); }
-        }
-        .cute-character {
-            display: inline-block;
-            animation: swing 2s ease-in-out infinite;
-            cursor: pointer;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-        }
-        body {
-            background: linear-gradient(135deg, #1e1e2f 0%, #111119 100%);
-            color: white;
-            font-family: 'Inter', sans-serif;
-            overflow-x: hidden;
-        }
-        .book-container {
-            perspective: 1000px;
-        }
-        .book {
-            transition: transform 1s;
-            transform-style: preserve-3d;
-        }
-        .book:hover {
-            transform: rotateY(-30deg);
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .hidden-view { display: none !important; }
+        .active-tab { background-color: #e5e7eb; border-left: 4px solid #2563eb; color: #1d4ed8; font-weight: bold; }
+        
+        /* Marksheet specific styling for PDF */
+        #pdf-document {
+            background: white; padding: 40px; border: 2px solid #1e3a8a;
+            border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
     </style>
 </head>
-<body>
+<body class="text-gray-800 antialiased h-screen flex overflow-hidden">
 
-    <nav class="p-6 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-blue-400">P for Problem <span class="text-sm font-light text-gray-400">x Firebox</span></h1>
-        <div id="logout-container" class="cursor-pointer flex items-center gap-2 hover:text-red-400 transition-all">
-            <span id="logout-text">Logout</span>
-            <i data-lucide="log-out" id="logout-icon"></i>
+    <div id="login-page" class="w-full h-full flex items-center justify-center bg-gray-900 absolute z-50 transition-opacity duration-500">
+        <div class="bg-white p-10 rounded-xl shadow-2xl w-96 transform transition-all">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-800">Team P for Problem</h2>
+                <p class="text-sm text-gray-500 mt-2">Secure Student Management</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Admin ID</label>
+                    <input type="text" id="userid" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="Enter ID">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+                    <input type="password" id="password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="••••••••">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300">
+                    Secure Login
+                </button>
+            </form>
         </div>
-    </nav>
+    </div>
 
-    <main class="container mx-auto px-4 py-10">
+    <div id="main-app" class="hidden-view w-full h-full flex">
         
-        <div class="flex flex-col lg:flex-row items-center justify-around gap-10">
-            <div class="book-container w-full max-w-md">
-                <div class="book glass p-8 shadow-2xl relative">
-                    <div class="absolute -top-12 left-1/2 -translate-x-1/2 text-5xl cute-character">
-                        🦉
-                        <div class="text-xs text-blue-300 font-mono mt-1">Legs Swinging...</div>
+        <aside class="w-64 bg-white shadow-xl flex flex-col justify-between h-full relative z-10">
+            <div>
+                <div class="p-6 border-b">
+                    <h1 class="text-2xl font-bold text-blue-700 flex items-center gap-2">
+                        <i class="fas fa-university"></i> Portal View
+                    </h1>
+                </div>
+                <nav class="mt-6 flex flex-col gap-2 px-4">
+                    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-btn active-tab flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition">
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </button>
+                    <button onclick="switchTab('attendance')" id="tab-attendance" class="nav-btn flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition">
+                        <i class="fas fa-user-check"></i> Present / Absent
+                    </button>
+                    <button onclick="switchTab('download')" id="tab-download" class="nav-btn flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition">
+                        <i class="fas fa-file-pdf"></i> Download Data
+                    </button>
+                </nav>
+            </div>
+            <div class="p-4 border-t">
+                <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-lg font-semibold transition">
+                    <i class="fas fa-sign-out-alt"></i> Secure Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="flex-1 bg-gray-50 h-full overflow-y-auto p-8">
+            
+            <div id="view-dashboard" class="page-view animate-fade-in">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">System Analytics</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
+                        <p class="text-gray-500 text-sm font-semibold">Total Students</p>
+                        <p class="text-3xl font-bold">1,248</p>
                     </div>
-                    
-                    <h2 class="text-3xl font-bold mb-6 text-center">Student Portal</h2>
-                    <form class="space-y-4">
-                        <div>
-                            <label class="block text-sm mb-1 text-gray-300">Student ID</label>
-                            <input type="text" class="w-full bg-gray-800 border border-gray-700 rounded p-3 focus:border-blue-500 outline-none transition" placeholder="Enter ID...">
-                        </div>
-                        <div>
-                            <label class="block text-sm mb-1 text-gray-300">Password</label>
-                            <input type="password" class="w-full bg-gray-800 border border-gray-700 rounded p-3 focus:border-blue-500 outline-none transition" placeholder="••••••••">
-                        </div>
-                        <button type="button" onclick="showDashboard()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg transform hover:scale-105 transition">
-                            Open Dashboard (Sync with Firebox)
-                        </button>
-                    </form>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
+                        <p class="text-gray-500 text-sm font-semibold">Average Attendance</p>
+                        <p class="text-3xl font-bold">87.5%</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500">
+                        <p class="text-gray-500 text-sm font-semibold">Firebox Sync Status</p>
+                        <p class="text-xl font-bold text-green-600"><i class="fas fa-check-circle"></i> Connected</p>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-6 rounded-xl shadow-sm w-full md:w-2/3">
+                    <h3 class="text-lg font-semibold mb-4">Performance Graph</h3>
+                    <canvas id="performanceChart" height="100"></canvas>
                 </div>
             </div>
 
-            <div id="dashboard" class="w-full lg:w-2/3 space-y-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="glass p-6 text-center">
-                        <i data-lucide="users" class="mx-auto mb-2 text-blue-400"></i>
-                        <h3 class="text-gray-400">Total Students</h3>
-                        <p class="text-2xl font-bold">1,250</p>
+            <div id="view-attendance" class="page-view hidden-view">
+                <h2 class="text-3xl font-bold mb-6 text-gray-800">Daily Attendance Tracker</h2>
+                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-600 text-sm">
+                                <th class="p-4 border-b">Roll No</th>
+                                <th class="p-4 border-b">Student Name</th>
+                                <th class="p-4 border-b">Status</th>
+                                <th class="p-4 border-b">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="p-4">CSE-201</td>
+                                <td class="p-4 font-semibold">Rishabh Sharma</td>
+                                <td class="p-4"><span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">Present</span></td>
+                                <td class="p-4">
+                                    <button class="text-blue-500 hover:text-blue-700 mr-2"><i class="fas fa-edit"></i> Edit</button>
+                                </td>
+                            </tr>
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="p-4">CSE-202</td>
+                                <td class="p-4 font-semibold">Aprajita Singh</td>
+                                <td class="p-4"><span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">Present</span></td>
+                                <td class="p-4"><button class="text-blue-500 hover:text-blue-700 mr-2"><i class="fas fa-edit"></i> Edit</button></td>
+                            </tr>
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-4">CSE-203</td>
+                                <td class="p-4 font-semibold">Arnav Kumar</td>
+                                <td class="p-4"><span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-bold">Absent</span></td>
+                                <td class="p-4"><button class="text-blue-500 hover:text-blue-700 mr-2"><i class="fas fa-edit"></i> Edit</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="view-download" class="page-view hidden-view">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-800">Generate Official Reports</h2>
+                        <p class="text-gray-500 mt-1">Download student data as a well-defined professional PDF.</p>
                     </div>
-                    <div class="glass p-6 text-center">
-                        <i data-lucide="book-open" class="mx-auto mb-2 text-green-400"></i>
-                        <h3 class="text-gray-400">Active Courses</h3>
-                        <p class="text-2xl font-bold">48</p>
-                    </div>
-                    <div class="glass p-6 text-center">
-                        <i data-lucide="database" class="mx-auto mb-2 text-purple-400"></i>
-                        <h3 class="text-gray-400">Firebox Storage</h3>
-                        <p class="text-2xl font-bold text-sm">85% Optimized</p>
-                    </div>
+                    <button onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center gap-2 transition">
+                        <i class="fas fa-download"></i> Download as PDF
+                    </button>
                 </div>
 
-                <div class="glass p-8">
-                    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
-                        <i data-lucide="bar-chart-3"></i> Attendance Analytics
-                    </h3>
-                    <div class="h-32 w-full flex items-end gap-2">
-                        <div class="bg-blue-500 w-full rounded-t" style="height: 60%"></div>
-                        <div class="bg-blue-500 w-full rounded-t" style="height: 80%"></div>
-                        <div class="bg-blue-400 w-full rounded-t" style="height: 40%"></div>
-                        <div class="bg-blue-600 w-full rounded-t" style="height: 90%"></div>
-                        <div class="bg-blue-300 w-full rounded-t" style="height: 70%"></div>
+                <div class="w-full overflow-x-auto">
+                    <div id="pdf-document" class="w-[800px] mx-auto">
+                        <div class="text-center border-b-2 border-gray-800 pb-4 mb-6">
+                            <h1 class="text-3xl font-bold uppercase tracking-wider text-blue-900">Institute of Technology</h1>
+                            <p class="text-gray-600 font-semibold">Official Student Academic Record</p>
+                            <p class="text-sm text-gray-500 mt-1">Generated via Team P for Problem Portal</p>
+                        </div>
+                        
+                        <div class="flex justify-between mb-8">
+                            <div>
+                                <p><strong>Student Name:</strong> Rishabh</p>
+                                <p><strong>Course:</strong> B.Tech Computer Science</p>
+                            </div>
+                            <div class="text-right">
+                                <p><strong>Roll No:</strong> CSE-201</p>
+                                <p><strong>Year:</strong> 2nd Year</p>
+                            </div>
+                        </div>
+
+                        <table class="w-full text-left border-collapse border border-gray-300">
+                            <thead>
+                                <tr class="bg-gray-100">
+                                    <th class="p-3 border border-gray-300">Subject</th>
+                                    <th class="p-3 border border-gray-300">Total Marks</th>
+                                    <th class="p-3 border border-gray-300">Marks Obtained</th>
+                                    <th class="p-3 border border-gray-300">Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="p-3 border border-gray-300">Mathematics II</td>
+                                    <td class="p-3 border border-gray-300">100</td>
+                                    <td class="p-3 border border-gray-300">85</td>
+                                    <td class="p-3 border border-gray-300 font-bold text-green-600">A</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 border border-gray-300">Data Structures</td>
+                                    <td class="p-3 border border-gray-300">100</td>
+                                    <td class="p-3 border border-gray-300">92</td>
+                                    <td class="p-3 border border-gray-300 font-bold text-green-600">A+</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 border border-gray-300">C Programming</td>
+                                    <td class="p-3 border border-gray-300">100</td>
+                                    <td class="p-3 border border-gray-300">78</td>
+                                    <td class="p-3 border border-gray-300 font-bold text-blue-600">B+</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="mt-12 flex justify-between items-end">
+                            <div class="text-center">
+                                <div class="w-32 border-b border-gray-800 mb-2"></div>
+                                <p class="text-sm font-semibold">Date of Issue</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-32 border-b border-gray-800 mb-2"></div>
+                                <p class="text-sm font-semibold">Controller of Examinations</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </main>
+
+        </main>
+    </div>
 
     <script>
-        // Initialize Icons
-        lucide.createIcons();
-
-        // Logout Animation (Bird stealing text concept)
-        const logoutBtn = document.getElementById('logout-container');
-        const logoutText = document.getElementById('logout-text');
-
-        logoutBtn.addEventListener('mouseenter', () => {
-            logoutText.style.transition = "all 0.5s ease";
-            logoutText.style.transform = "translateY(-50px) rotate(15deg)";
-            logoutText.style.opacity = "0";
+        // 1. Authentication Logic
+        function handleLogin(e) {
+            e.preventDefault(); // Prevents page reload
+            // Add a simple loading effect
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+            
             setTimeout(() => {
-                logoutText.innerText = "Bye!";
-                logoutText.style.transform = "translateY(0) rotate(0)";
-                logoutText.style.opacity = "1";
-            }, 500);
-        });
+                document.getElementById('login-page').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('login-page').classList.add('hidden-view');
+                    document.getElementById('main-app').classList.remove('hidden-view');
+                    renderChart(); // Load graph only after login
+                }, 500);
+            }, 800);
+        }
 
-        // Simple Dashboard Toggle
-        function showDashboard() {
-            alert("Syncing with Firebox... Login Successful!");
-            document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
+        function handleLogout() {
+            document.getElementById('main-app').classList.add('hidden-view');
+            const loginPage = document.getElementById('login-page');
+            loginPage.classList.remove('hidden-view');
+            // Small delay to allow display block to apply before animating opacity
+            setTimeout(() => {
+                loginPage.style.opacity = '1';
+                document.getElementById('loginForm').reset();
+                document.querySelector('#loginForm button').innerHTML = 'Secure Login';
+            }, 50);
+        }
+
+        // 2. Tab Navigation Logic (Simulating Multiple Pages)
+        function switchTab(tabId) {
+            // Hide all views
+            document.querySelectorAll('.page-view').forEach(view => {
+                view.classList.add('hidden-view');
+            });
+            // Remove active class from all buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active-tab', 'hover:bg-gray-100');
+                if(!btn.classList.contains('active-tab')) btn.classList.add('hover:bg-gray-100');
+            });
+
+            // Show selected view
+            document.getElementById(`view-${tabId}`).classList.remove('hidden-view');
+            
+            // Highlight selected tab
+            const activeBtn = document.getElementById(`tab-${tabId}`);
+            activeBtn.classList.add('active-tab');
+            activeBtn.classList.remove('hover:bg-gray-100');
+        }
+
+        // 3. Graph Generation Logic
+        let chartInstance = null;
+        function renderChart() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy(); // Prevent duplicate rendering
+            
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Average Institute Score',
+                        data: [65, 78, 72, 85, 82, 90],
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+        }
+
+        // 4. Professional PDF Generation
+        function downloadPDF() {
+            const element = document.getElementById('pdf-document');
+            const opt = {
+                margin:       0.5,
+                filename:     'Official_Marksheet.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            // Alert user that download is starting
+            alert("Generating Professional PDF Document...");
+            html2pdf().set(opt).from(element).save();
         }
     </script>
 </body>
