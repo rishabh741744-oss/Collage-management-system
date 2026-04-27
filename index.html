@@ -6,6 +6,7 @@
     <title>EduVerse - Smart Student Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -29,13 +30,19 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
         * { font-family: 'Poppins', sans-serif; }
-       .glass { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
-       .bg-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #db2777 100%); background-attachment: fixed; }
-       .floating { animation: floating 3s ease-in-out infinite; }
+     .glass { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
+     .bg-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #db2777 100%); background-attachment: fixed; }
+     .floating { animation: floating 3s ease-in-out infinite; }
         @keyframes floating { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
-       .btn-hover { transition: all 0.3s ease; }
-       .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-       .attendance-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
+     .btn-hover { transition: all 0.3s ease; }
+     .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+     .attendance-dot { width: 28px; height: 28px; border-radius: 50%; cursor: pointer; }
+     .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500); }
+     .rank-2 { background: linear-gradient(135deg, #C0C0C0, #A9A9A9); }
+     .rank-3 { background: linear-gradient(135deg, #CD7F32, #8B4513); }
+     .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+     .modal-content { animation: slideIn 0.3s ease; }
+      @keyframes slideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     </style>
 </head>
 <body class="bg-gradient min-h-screen">
@@ -91,10 +98,18 @@
                         <h1 class="text-2xl font-bold text-white">EduVerse</h1>
                         <p class="text-blue-200 text-sm">Welcome, <span id="userInfo" class="font-semibold"></span></p>
                     </div>
+                </div>
                 <button onclick="doLogout()" class="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg btn-hover flex items-center gap-2">
                     <i data-lucide="log-out" class="w-4 h-4"></i> Logout
                 </button>
             </nav>
+
+            <div id="announcementBar" class="glass rounded-xl p-3 mb-6 text-white hidden">
+                <div class="flex items-center gap-2">
+                    <i data-lucide="megaphone" class="w-5 h-5 text-yellow-400"></i>
+                    <p class="text-sm"><span class="font-semibold">Notice:</span> <span id="announcementText"></span></p>
+                </div>
+            </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="glass rounded-xl p-4 text-white">
@@ -114,28 +129,41 @@
                         </div>
                         <i data-lucide="user-check" class="w-8 h-8 text-green-400"></i>
                     </div>
-                </div>
                 <div class="glass rounded-xl p-4 text-white">
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-blue-200 text-sm">Avg Attendance</p>
-                            <p class="text-2xl font-bold" id="avgAttendance">0%</p>
+                            <p class="text-blue-200 text-sm">Avg CGPA</p>
+                            <p class="text-2xl font-bold" id="avgCGPA">0.0</p>
                         </div>
-                        <i data-lucide="calendar-check" class="w-8 h-8 text-purple-400"></i>
+                        <i data-lucide="trending-up" class="w-8 h-8 text-purple-400"></i>
                     </div>
                 </div>
                 <div class="glass rounded-xl p-4 text-white">
                     <div class="flex justify-between items-center">
                         <div>
-                            <p class="text-blue-200 text-sm">Total Classes</p>
-                            <p class="text-2xl font-bold" id="totalClasses">0</p>
+                            <p class="text-blue-200 text-sm">Top Scorer</p>
+                            <p class="text-lg font-bold" id="topScorer">-</p>
                         </div>
-                        <i data-lucide="book-open" class="w-8 h-8 text-yellow-400"></i>
+                        <i data-lucide="trophy" class="w-8 h-8 text-yellow-400"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- NEW: ATTENDANCE BOARD -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div class="glass rounded-2xl p-6 lg:col-span-2">
+                    <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3" class="w-5 h-5"></i> Weekly Attendance Graph
+                    </h2>
+                    <canvas id="attendanceChart" height="200"></canvas>
+                </div>
+                <div class="glass rounded-2xl p-6">
+                    <h2 class="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                        <i data-lucide="award" class="w-5 h-5"></i> Top 3 Performers
+                    </h2>
+                    <div id="leaderboard" class="space-y-3"></div>
+                </div>
+            </div>
+
             <div class="glass rounded-2xl p-6 mb-6">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4">
                     <h2 class="text-xl font-semibold text-white flex items-center gap-2">
@@ -145,22 +173,30 @@
                         <input type="date" id="weekStart" class="bg-white/20 text-white border border-white/30 p-2 rounded-lg text-sm">
                         <button onclick="loadWeek()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg btn-hover text-sm">Load Week</button>
                     </div>
-                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full min-w-[800px]">
                         <thead class="bg-white/20">
                             <tr class="text-white text-sm" id="attendanceHeader">
                                 <th class="p-2 text-left">Student</th>
-                                <!-- Days will be added by JS -->
                             </tr>
                         </thead>
                         <tbody id="attendanceBody" class="text-white"></tbody>
                     </table>
                 </div>
-                <p class="text-xs text-blue-200 mt-3">Click dots to mark: 🟢 Present | 🔴 Absent | ⚪ Not Marked</p>
+                <p class="text-xs text-blue-200 mt-3">Admin only: Click dots to mark - 🟢 Present | 🔴 Absent | ⚪ Not Marked</p>
             </div>
 
             <div class="glass rounded-2xl p-6">
+                <div id="announcementPanel" class="mb-8 p-4 bg-yellow-500/20 rounded-xl border border-yellow-400/30 hidden">
+                    <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
+                        <i data-lucide="megaphone" class="w-5 h-5"></i> Post Announcement
+                    </h2>
+                    <div class="flex gap-4">
+                        <input id="announcementInput" type="text" placeholder="Enter notice for all students..." class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg flex-1">
+                        <button onclick="postAnnouncement()" class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg btn-hover">Post</button>
+                    </div>
+                </div>
+
                 <div id="userManagePanel" class="mb-8 p-4 bg-blue-500/20 rounded-xl border border-blue-400/30 hidden">
                     <h2 class="text-xl font-semibold mb-4 text-white flex items-center gap-2">
                         <i data-lucide="user-plus" class="w-5 h-5"></i> Create New User Account
@@ -182,37 +218,81 @@
                         <i data-lucide="file-plus" class="w-5 h-5"></i> Add / Edit Student Data
                     </h2>
                     <input type="hidden" id="editIndex">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                         <input id="name" type="text" placeholder="Student Name" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
                         <input id="roll" type="text" placeholder="Roll Number" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
                         <input id="course" type="text" placeholder="Course" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <select id="section" class="bg-white/20 text-white border border-white/30 p-2 rounded-lg">
+                            <option value="" class="text-gray-800">-- Section --</option>
+                            <option value="A" class="text-gray-800">Section A</option>
+                            <option value="B" class="text-gray-800">Section B</option>
+                            <option value="C" class="text-gray-800">Section C</option>
+                        </select>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <input id="email" type="text" placeholder="Email" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <input id="marks" type="number" placeholder="Marks /100" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <input id="sgpa" type="number" step="0.01" placeholder="SGPA /10" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
+                        <input id="cgpa" type="number" step="0.01" placeholder="CGPA /10" class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg">
                     </div>
                     <button onclick="saveStudent()" class="mt-4 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg btn-hover">Save Student 💾</button>
                 </div>
 
+                <!-- NEW: SECTION SELECTOR FOR ADMIN -->
+                <div id="sectionSelector" class="mb-4 hidden">
+                    <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                        <select id="sectionFilter" onchange="filterBySection()" class="bg-white/20 text-white border border-white/30 p-3 rounded-lg">
+                            <option value="" class="text-gray-800">-- Select Section to View Students --</option>
+                            <option value="A" class="text-gray-800">Section A</option>
+                            <option value="B" class="text-gray-800">Section B</option>
+                            <option value="C" class="text-gray-800">Section C</option>
+                        </select>
+                        <p class="text-blue-200 text-sm" id="sectionCount"></p>
+                    </div>
+                </div>
+
                 <div class="flex flex-col md:flex-row gap-4 mb-4">
-                    <input id="searchInput" type="text" onkeyup="showStudents()" placeholder="🔍 Search students..." class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg flex-1">
+                    <input id="searchInput" type="text" onkeyup="showStudents()" placeholder="🔍 Search by name or roll no..." class="bg-white/20 text-white placeholder-blue-200 border border-white/30 p-2 rounded-lg flex-1">
                     <button onclick="downloadPDF()" class="bg-red-500/80 hover:bg-red-600 text-white px-4 py-2 rounded-lg btn-hover flex items-center gap-2">
                         <i data-lucide="download" class="w-4 h-4"></i> Download PDF
                     </button>
                 </div>
 
                 <div class="overflow-x-auto rounded-xl w-full">
-                    <table class="w-full min-w-[700px]">
+                    <table class="w-full min-w-[900px]">
                         <thead class="bg-white/20">
                             <tr class="text-white">
                                 <th class="p-3 text-left">S.No</th>
                                 <th class="p-3 text-left">Name</th>
                                 <th class="p-3 text-left">Roll No</th>
+                                <th class="p-3 text-left">Section</th>
                                 <th class="p-3 text-left">Course</th>
-                                <th class="p-3 text-left">Email</th>
+                                <th class="p-3 text-left">Marks</th>
+                                <th class="p-3 text-left">SGPA</th>
+                                <th class="p-3 text-left">CGPA</th>
                                 <th id="actionHead" class="p-3 text-left hidden">Action</th>
                             </tr>
                         </thead>
                         <tbody id="studentTable" class="text-white"></tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- STUDENT PROFILE MODAL -->
+    <div id="profileModal" class="modal">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="modal-content glass rounded-2xl p-6 max-w-2xl w-full">
+                <div class="flex justify-between items-start mb-4">
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+                        <i data-lucide="user" class="w-6 h-6"></i> Student Profile
+                    </h2>
+                    <button onclick="closeProfile()" class="text-white hover:text-red-400">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <div id="profileContent" class="text-white space-y-4"></div>
             </div>
         </div>
     </div>
@@ -225,346 +305,9 @@
         lucide.createIcons();
         let currentUser = null;
         let currentWeekStart = new Date();
-
-        // Set today as default
+        let attendanceChart = null;
+        let selectedSection = '';
         document.getElementById('weekStart').valueAsDate = new Date();
 
         function getWeekDates(startDate) {
-            const dates = [];
-            const start = new Date(startDate);
-            for(let i = 0; i < 7; i++) {
-                const date = new Date(start);
-                date.setDate(start.getDate() + i);
-                dates.push(date);
-            }
-            return dates;
-        }
-
-        function formatDate(date) {
-            return date.toISOString().split('T')[0];
-        }
-
-        async function loadWeek() {
-            const dateInput = document.getElementById('weekStart').value;
-            currentWeekStart = dateInput? new Date(dateInput) : new Date();
-            await renderAttendanceBoard();
-        }
-
-        async function renderAttendanceBoard() {
-            const weekDates = getWeekDates(currentWeekStart);
-            const header = document.getElementById('attendanceHeader');
-            header.innerHTML = '<th class="p-2 text-left">Student</th>';
-
-            weekDates.forEach(date => {
-                const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
-                const dayNum = date.getDate();
-                header.innerHTML += `<th class="p-2 text-center text-xs">${dayName}<br>${dayNum}</th>`;
-            });
-
-            const students = await getStudents();
-            const body = document.getElementById('attendanceBody');
-            body.innerHTML = '';
-
-            if (students.length === 0) {
-                body.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-blue-200">No students found. Add students first.</td></tr>`;
-                return;
-            }
-
-            for (const student of students) {
-                let row = `<tr class="border-b border-white/10"><td class="p-2 font-medium">${student.name}</td>`;
-
-                for (const date of weekDates) {
-                    const dateStr = formatDate(date);
-                    const attendanceRef = window.dbRef(window.db, `attendance/${student.key}/${dateStr}`);
-                    const snapshot = await window.dbGet(attendanceRef);
-                    const status = snapshot.exists()? snapshot.val() : 'none';
-
-                    let color = 'bg-white/20';
-                    if (status === 'present') color = 'bg-green-500';
-                    else if (status === 'absent') color = 'bg-red-500';
-
-                    const canEdit = currentUser?.role === 'admin'? `onclick="toggleAttendance('${student.key}', '${dateStr}')"` : '';
-                    row += `<td class="p-2 text-center"><div class="attendance-dot ${color} mx-auto" ${canEdit}></div></td>`;
-                }
-                row += '</tr>';
-                body.innerHTML += row;
-            }
-            updateStats();
-        }
-
-        async function toggleAttendance(studentKey, dateStr) {
-            if (currentUser?.role!== 'admin') return;
-
-            const attendanceRef = window.dbRef(window.db, `attendance/${studentKey}/${dateStr}`);
-            const snapshot = await window.dbGet(attendanceRef);
-            const current = snapshot.exists()? snapshot.val() : 'none';
-
-            let next = 'present';
-            if (current === 'present') next = 'absent';
-            else if (current === 'absent') next = 'none';
-
-            await window.dbSet(attendanceRef, next);
-            await renderAttendanceBoard();
-        }
-
-        async function updateStats() {
-            const today = formatDate(new Date());
-            const students = await getStudents();
-            let presentCount = 0;
-            let totalMarked = 0;
-
-            for (const student of students) {
-                const attendanceRef = window.dbRef(window.db, `attendance/${student.key}/${today}`);
-                const snapshot = await window.dbGet(attendanceRef);
-                if (snapshot.exists() && snapshot.val() === 'present') presentCount++;
-                if (snapshot.exists()) totalMarked++;
-            }
-
-            document.getElementById('presentToday').innerText = presentCount;
-            document.getElementById('avgAttendance').innerText = students.length? Math.round((presentCount / students.length) * 100) + '%' : '0%';
-            document.getElementById('totalClasses').innerText = totalMarked;
-        }
-
-        async function updateLiveCount() {
-            try {
-                const usersRef = window.dbRef(window.db, 'users');
-                const snapshot = await window.dbGet(usersRef);
-                const count = snapshot.exists()? Object.keys(snapshot.val()).length : 0;
-                document.getElementById('liveCount').innerText = count + ' Users Registered';
-            } catch(e) {
-                document.getElementById('liveCount').innerText = '0 Users Registered';
-            }
-        }
-        updateLiveCount();
-
-        function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toast');
-            const color = type === 'success'? 'bg-green-500' : 'bg-red-500';
-            toast.className = `fixed bottom-4 right-4 ${color} text-white px-6 py-3 rounded-lg shadow-lg z-50`;
-            toast.innerText = msg;
-            toast.classList.remove('hidden');
-            setTimeout(() => toast.classList.add('hidden'), 3000);
-        }
-
-        async function guestLogin() {
-            document.getElementById('role').value = 'student';
-            document.getElementById('username').value = 'guest';
-            document.getElementById('password').value = 'guest123';
-            await doLogin();
-        }
-
-        async function doLogin() {
-            const role = document.getElementById('role').value;
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            if (!role ||!username ||!password) {
-                showToast("Sab fields bharo 😅", 'error');
-                return;
-            }
-
-            try {
-                const userRef = window.dbRef(window.db, `users/${username}`);
-                const snapshot = await window.dbGet(userRef);
-                if (snapshot.exists()) {
-                    const user = snapshot.val();
-                    if (user.role === role && user.password === password) {
-                        currentUser = user;
-                        document.getElementById('loginScreen').classList.add('hidden');
-                        document.getElementById('dashboard').classList.remove('hidden');
-                        document.getElementById('userInfo').innerText = `${user.fullName} (${user.role})`;
-                        if (user.role === 'admin') {
-                            document.getElementById('adminPanel').classList.remove('hidden');
-                            document.getElementById('userManagePanel').classList.remove('hidden');
-                            document.getElementById('actionHead').classList.remove('hidden');
-                        }
-                        showStudents();
-                        loadWeek();
-                        showToast(`Welcome back, ${user.fullName}! 🎉`);
-                    } else {
-                        showToast("Galat Password ya Role! 🤔", 'error');
-                    }
-                } else {
-                    showToast("User nahi mila! 📞", 'error');
-                }
-            } catch(e) {
-                showToast("Firebase error! Rules check karo 🔥", 'error');
-                console.log(e);
-            }
-        }
-
-        function doLogout() {
-            currentUser = null;
-            document.getElementById('loginScreen').classList.remove('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('adminPanel').classList.add('hidden');
-            document.getElementById('userManagePanel').classList.add('hidden');
-            document.getElementById('actionHead').classList.add('hidden');
-            document.getElementById('role').value = '';
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            showToast("Logout ho gaya! Phir milte hain 👋");
-        }
-
-        async function createUser() {
-            if (currentUser?.role!== 'admin') return;
-            const role = document.getElementById('newUserRole').value;
-            const username = document.getElementById('newUsername').value;
-            const password = document.getElementById('newPassword').value;
-            const fullName = document.getElementById('newUserFullName').value;
-            if(!username ||!password ||!fullName) {
-                showToast('Sab fields bharo 📝', 'error');
-                return;
-            }
-
-            const userRef = window.dbRef(window.db, `users/${username}`);
-            const snapshot = await window.dbGet(userRef);
-            if (snapshot.exists()) {
-                showToast('Ye username pehle se hai! 😅', 'error');
-                return;
-            }
-
-            await window.dbSet(userRef, { role, username, password, fullName });
-            showToast(`User ban gaya! ${username} ab login kar sakta hai 🎉`);
-            document.getElementById('newUsername').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('newUserFullName').value = '';
-            updateLiveCount();
-        }
-
-        async function getStudents() {
-            try {
-                const studentsRef = window.dbRef(window.db, 'students');
-                const snapshot = await window.dbGet(studentsRef);
-                if (snapshot.exists()) {
-                    const data = Object.entries(snapshot.val()).map(([key, val]) => ({...val, key}));
-                    document.getElementById('totalStudents').innerText = data.length;
-                    return data;
-                }
-                document.getElementById('totalStudents').innerText = 0;
-                return [];
-            } catch(e) {
-                return [];
-            }
-        }
-
-        async function saveStudent() {
-            if (currentUser?.role!== 'admin') return;
-            const name = document.getElementById('name').value;
-            const roll = document.getElementById('roll').value;
-            const course = document.getElementById('course').value;
-            const email = document.getElementById('email').value;
-            const editIndex = document.getElementById('editIndex').value;
-            if(!name ||!roll ||!course) {
-                showToast('Name, Roll No, Course zaruri hai 📚', 'error');
-                return;
-            }
-
-            if (editIndex === '') {
-                const newStudentRef = window.dbPush(window.dbRef(window.db, 'students'));
-                await window.dbSet(newStudentRef, {name, roll, course, email});
-                showToast('Student add ho gaya! 🎓');
-            } else {
-                await window.dbUpdate(window.dbRef(window.db, `students/${editIndex}`), {name, roll, course, email});
-                showToast('Student update ho gaya! ✏️');
-            }
-            clearForm();
-            showStudents();
-            renderAttendanceBoard();
-        }
-
-        async function editStudent(key) {
-            if (currentUser?.role!== 'admin') return;
-            const studentRef = window.dbRef(window.db, `students/${key}`);
-            const snapshot = await window.dbGet(studentRef);
-            if (snapshot.exists()) {
-                const student = snapshot.val();
-                document.getElementById('name').value = student.name;
-                document.getElementById('roll').value = student.roll;
-                document.getElementById('course').value = student.course;
-                document.getElementById('email').value = student.email || '';
-                document.getElementById('editIndex').value = key;
-                window.scrollTo(0, 0);
-                showToast('Edit mode on! ✏️');
-            }
-        }
-
-        async function deleteStudent(key) {
-            if (currentUser?.role!== 'admin') return;
-            if (confirm('Pakka delete karna hai? 🗑️')) {
-                await window.dbRemove(window.dbRef(window.db, `students/${key}`));
-                await window.dbRemove(window.dbRef(window.db, `attendance/${key}`));
-                showToast('Student delete ho gaya 🗑️');
-                showStudents();
-                renderAttendanceBoard();
-            }
-        }
-
-        function clearForm() {
-            document.getElementById('name').value = '';
-            document.getElementById('roll').value = '';
-            document.getElementById('course').value = '';
-            document.getElementById('email').value = '';
-            document.getElementById('editIndex').value = '';
-        }
-
-        async function showStudents() {
-            const students = await getStudents();
-            const table = document.getElementById('studentTable');
-            const searchText = document.getElementById('searchInput').value.toLowerCase();
-            table.innerHTML = '';
-
-            if (students.length === 0) {
-                table.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-blue-200">Koi student nahi mila. Pehla student add karo 🚀</td></tr>`;
-                return;
-            }
-
-            students.forEach((student, index) => {
-                if (student.name.toLowerCase().includes(searchText) ||
-                    student.roll.toLowerCase().includes(searchText) ||
-                    student.course.toLowerCase().includes(searchText)) {
-                    table.innerHTML += `<tr class="border-b border-white/10 hover:bg-white/5">
-                        <td class="p-3">${index + 1}</td>
-                        <td class="p-3 font-medium">${student.name}</td>
-                        <td class="p-3">${student.roll}</td>
-                        <td class="p-3">${student.course}</td>
-                        <td class="p-3">${student.email || '-'}</td>
-                        <td class="p-3 ${currentUser?.role === 'admin'? '' : 'hidden'}">
-                            <button onclick="editStudent('${student.key}')" class="bg-yellow-500/80 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm mr-1 btn-hover">Edit</button>
-                            <button onclick="deleteStudent('${student.key}')" class="bg-red-500/80 hover:bg-red-600 text-white px-3 py-1 rounded text-sm btn-hover">Delete</button>
-                        </td></tr>`;
-                }
-            });
-            lucide.createIcons();
-        }
-
-        async function downloadPDF() {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            const students = await getStudents();
-            doc.setFontSize(18);
-            doc.text("EduVerse - Student List", 14, 20);
-            const tableData = students.map((s, i) => [i+1, s.name, s.roll, s.course, s.email || '-']);
-            doc.autoTable({
-                head: [['S.No', 'Name', 'Roll No', 'Course', 'Email']],
-                body: tableData,
-                startY: 35,
-                theme: 'grid'
-            });
-            doc.save('EduVerse_Students.pdf');
-            showToast('PDF download ho gaya! 📄');
-        }
-
-        window.doLogin = doLogin;
-        window.guestLogin = guestLogin;
-        window.doLogout = doLogout;
-        window.createUser = createUser;
-        window.saveStudent = saveStudent;
-        window.editStudent = editStudent;
-        window.deleteStudent = deleteStudent;
-        window.downloadPDF = downloadPDF;
-        window.showStudents = showStudents;
-        window.loadWeek = loadWeek;
-        window.toggleAttendance = toggleAttendance;
-    </script>
-</body>
-</html>
+    
