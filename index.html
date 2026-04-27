@@ -54,6 +54,16 @@
 
         .student-only { display: none; }
         .admin-only { display: none; }
+
+        /* Edit Mode Highlight */
+        .editable-active {
+            background-color: rgba(59, 130, 246, 0.2);
+            border: 1px dashed #3b82f6;
+            padding: 2px 4px;
+            border-radius: 4px;
+            outline: none;
+            cursor: text;
+        }
     </style>
 </head>
 <body class="h-screen w-screen flex flex-col md:flex-row">
@@ -65,23 +75,23 @@
                 <h1 class="text-3xl font-bold neon-text mb-2">P for Problem</h1>
                 <p class="text-slate-400 text-sm">v2.0 Professional Portal</p>
             </div>
-            <form onsubmit="handleLogin(event)">
+            <form id="loginForm">
                 <div class="mb-4">
                     <label class="block text-sm text-slate-300 mb-2">Login Role</label>
-                    <select id="login-role" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue">
+                    <select id="login-role" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue cursor-pointer">
                         <option value="admin">Administrator (Admin)</option>
                         <option value="student">Student (View Only)</option>
                     </select>
                 </div>
                 <div class="mb-4">
                     <label class="block text-sm text-slate-300 mb-2">Roll Number / Admin ID</label>
-                    <input type="text" id="login-id" value="admin" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue">
+                    <input type="text" id="login-id" value="admin" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue transition-all">
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm text-slate-300 mb-2">Password</label>
-                    <input type="password" value="admin123" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue">
+                    <input type="password" value="admin123" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue transition-all">
                 </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all">
+                <button type="button" onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all transform hover:scale-105 active:scale-95">
                     Secure Login
                 </button>
             </form>
@@ -97,24 +107,19 @@
                 <p id="display-college-name" class="text-xs text-slate-400 mt-1 uppercase tracking-wider">ABC College</p>
             </div>
             <nav class="mt-4 flex flex-col gap-1 px-2">
-                <button onclick="nav('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-home w-5"></i> Dashboard</button>
-                <button onclick="nav('students-list')" id="nav-students-list" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-users w-5"></i> Students List</button>
+                <button onclick="nav('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-home w-5"></i> Dashboard</button>
+                <button onclick="nav('students-list')" id="nav-students-list" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-users w-5"></i> Students List</button>
                 
-                <button onclick="nav('student-profile')" id="nav-student-profile" class="nav-item student-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-user-circle w-5"></i> My Profile</button>
+                <button onclick="nav('student-profile')" id="nav-student-profile" class="nav-item student-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-user-circle w-5"></i> My Profile</button>
                 
-                <button onclick="nav('add-student')" id="nav-add-student" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-user-plus w-5"></i> Add Student</button>
-                <button onclick="nav('marks-entry')" id="nav-marks-entry" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-edit w-5"></i> Marks Entry (Tally)</button>
+                <button onclick="nav('add-student')" id="nav-add-student" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-user-plus w-5"></i> Add Student</button>
+                <button onclick="nav('marks-entry')" id="nav-marks-entry" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-edit w-5"></i> Marks Entry (Tally)</button>
                 
-                <button onclick="nav('attendance')" id="nav-attendance" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-calendar-check w-5"></i> Attendance</button>
-                <button onclick="nav('performance')" id="nav-performance" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-chart-line w-5"></i> Performance</button>
-                <button onclick="nav('reports')" id="nav-reports" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-file-pdf w-5"></i> Reports & PDF</button>
-                <button onclick="nav('notice-board')" id="nav-notice-board" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-bullhorn w-5"></i> Notice Board</button>
-                
-                <button onclick="nav('settings')" id="nav-settings" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-cog w-5"></i> Settings</button>
+                <button onclick="nav('reports')" id="nav-reports" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800 transition-all cursor-pointer"><i class="fas fa-file-pdf w-5"></i> Reports & PDF</button>
             </nav>
         </div>
         <div class="absolute bottom-0 w-full p-4 glass-panel border-t border-slate-800">
-            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 py-2 rounded-lg text-sm font-semibold transition-all">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 py-2 rounded-lg text-sm font-semibold transition-all hover:scale-105 active:scale-95 cursor-pointer">
                 <i class="fas fa-power-off"></i> Logout <span id="role-badge" class="uppercase text-xs ml-1 opacity-70"></span>
             </button>
         </div>
@@ -133,16 +138,16 @@
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-500">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 cursor-default">
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-500 transform hover:-translate-y-2 transition-all">
                     <p class="text-slate-400 text-sm mb-1">Total Students</p>
-                    <h3 class="text-3xl font-bold">1,024</h3>
+                    <h3 class="text-3xl font-bold text-white">1,024</h3>
                 </div>
-                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500">
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500 transform hover:-translate-y-2 transition-all">
                     <p class="text-slate-400 text-sm mb-1">Avg Institute Attendance</p>
-                    <h3 class="text-3xl font-bold">92%</h3>
+                    <h3 class="text-3xl font-bold text-white">92%</h3>
                 </div>
-                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-500">
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-500 transform hover:-translate-y-2 transition-all">
                     <p class="text-slate-400 text-sm mb-1">Latest Notice</p>
                     <h3 class="text-lg font-bold mt-1 text-purple-400 truncate">Mid Term Exams Scheduled</h3>
                 </div>
@@ -151,19 +156,19 @@
 
         <section id="page-students-list" class="page-section">
             <h2 class="text-2xl font-bold mb-6">Class Directory</h2>
-            <div class="glass-panel rounded-xl overflow-hidden">
-                <div class="p-4 border-b border-slate-700/50 flex justify-between items-center">
+            <div class="glass-panel rounded-xl overflow-hidden shadow-lg">
+                <div class="p-4 border-b border-slate-700/50 flex justify-between items-center bg-slate-800/30">
                     <div class="flex gap-4">
-                        <select class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-sm outline-none">
+                        <select class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-sm outline-none cursor-pointer hover:border-neonBlue transition-colors">
                             <option>Section A</option>
                             <option>Section B</option>
                         </select>
-                        <span class="text-sm text-slate-400 self-center">Showing 60 students</span>
+                        <span class="text-sm text-slate-400 self-center">Showing students</span>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
-                        <thead class="bg-slate-800/50 text-slate-400 text-sm">
+                        <thead class="bg-slate-800/80 text-slate-400 text-sm uppercase tracking-wider">
                             <tr>
                                 <th class="p-4 font-medium">Roll No</th>
                                 <th class="p-4 font-medium">Student Name</th>
@@ -181,77 +186,99 @@
         <section id="page-student-profile" class="page-section">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold">Student Biodata</h2>
-                <div class="flex gap-2">
-                    <button class="admin-only bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded text-sm transition"><i class="fas fa-edit"></i> Edit</button>
-                    <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-semibold shadow-lg shadow-blue-500/20 transition"><i class="fas fa-download"></i> Marksheet PDF</button>
+                <div class="flex gap-3">
+                    <button id="edit-btn" onclick="toggleEditMode()" class="admin-only bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded text-sm transition-all shadow hover:shadow-lg cursor-pointer flex items-center gap-2">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-semibold shadow-lg shadow-blue-500/20 transition-all transform hover:scale-105 active:scale-95 cursor-pointer flex items-center gap-2">
+                        <i class="fas fa-download"></i> Marksheet PDF
+                    </button>
                 </div>
             </div>
 
-            <div class="glass-panel p-6 rounded-xl flex flex-col md:flex-row gap-6 items-start mb-6">
+            <div class="glass-panel p-6 rounded-xl flex flex-col md:flex-row gap-6 items-start mb-6 border border-slate-700 hover:border-blue-500/30 transition-colors">
                 <div class="w-24 h-24 rounded-xl bg-slate-700 flex items-center justify-center text-3xl font-bold text-slate-400 shadow-inner">
                     <span id="prof-init">R</span>
                 </div>
-                <div class="flex-1 grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
-                    <div><p class="text-slate-500 mb-1">Full Name</p><p class="font-semibold text-lg" id="prof-name">Rishabh Kumar</p></div>
-                    <div><p class="text-slate-500 mb-1">Roll Number</p><p class="font-semibold text-lg text-neonBlue" id="prof-roll">101</p></div>
-                    <div><p class="text-slate-500 mb-1">Section & Course</p><p class="font-semibold" id="prof-sec">Section A • BCA</p></div>
-                    <div><p class="text-slate-500 mb-1">Father's Name</p><p class="font-semibold" id="prof-fname">Rajesh Kumar</p></div>
-                    <div><p class="text-slate-500 mb-1">College</p><p class="font-semibold text-emerald-400" id="prof-col">ABC College</p></div>
-                    <div><p class="text-slate-500 mb-1">Email ID</p><p class="font-semibold text-slate-300" id="prof-mail">rishabh@gmail.com</p></div>
+                <div class="flex-1 grid grid-cols-2 md:grid-cols-3 gap-y-6 gap-x-6 text-sm">
+                    <div>
+                        <p class="text-slate-500 mb-1"><i class="fas fa-user text-xs mr-1"></i> Full Name</p>
+                        <p class="font-semibold text-lg transition-all" id="prof-name">Rishabh Kumar</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 mb-1"><i class="fas fa-id-badge text-xs mr-1"></i> Roll Number</p>
+                        <p class="font-semibold text-lg text-neonBlue" id="prof-roll">101</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 mb-1"><i class="fas fa-chalkboard text-xs mr-1"></i> Section & Course</p>
+                        <p class="font-semibold" id="prof-sec">Section A • BCA</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 mb-1"><i class="fas fa-user-tie text-xs mr-1"></i> Father's Name</p>
+                        <p class="font-semibold transition-all" id="prof-fname">Rajesh Kumar</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 mb-1"><i class="fas fa-university text-xs mr-1"></i> College</p>
+                        <p class="font-semibold text-emerald-400" id="prof-col">ABC College</p>
+                    </div>
+                    <div>
+                        <p class="text-slate-500 mb-1"><i class="fas fa-envelope text-xs mr-1"></i> Email ID</p>
+                        <p class="font-semibold text-slate-300 transition-all" id="prof-mail">rishabh@gmail.com</p>
+                    </div>
                 </div>
             </div>
 
             <h3 class="text-lg font-bold mb-3 border-b border-slate-700 pb-2">Academic Record (Tally Type)</h3>
-            <div class="glass-panel rounded-xl overflow-hidden mb-6">
+            <div class="glass-panel rounded-xl overflow-hidden mb-6 shadow-lg">
                 <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-800/80 text-slate-300 border-b border-slate-600">
+                    <thead class="bg-slate-800/80 text-slate-300 border-b border-slate-600 uppercase tracking-wider text-xs">
                         <tr>
-                            <th class="p-3">Subject Name</th>
-                            <th class="p-3 text-center">Max Marks</th>
-                            <th class="p-3 text-center">Obtained</th>
-                            <th class="p-3 text-right">Percentage</th>
+                            <th class="p-4">Subject Name</th>
+                            <th class="p-4 text-center">Max Marks</th>
+                            <th class="p-4 text-center">Obtained</th>
+                            <th class="p-4 text-right">Percentage</th>
                         </tr>
                     </thead>
                     <tbody id="prof-marks-body" class="divide-y divide-slate-700/50">
                         </tbody>
                     <tfoot class="bg-blue-900/20 border-t border-blue-500/30 font-bold">
                         <tr>
-                            <td class="p-3 text-neonBlue">GRAND TOTAL</td>
-                            <td class="p-3 text-center" id="prof-max">200</td>
-                            <td class="p-3 text-center text-emerald-400" id="prof-ob">163</td>
-                            <td class="p-3 text-right text-emerald-400" id="prof-perc">81.5%</td>
+                            <td class="p-4 text-neonBlue">GRAND TOTAL</td>
+                            <td class="p-4 text-center" id="prof-max">200</td>
+                            <td class="p-4 text-center text-emerald-400" id="prof-ob">163</td>
+                            <td class="p-4 text-right text-emerald-400" id="prof-perc">81.5%</td>
                         </tr>
                     </tfoot>
                 </table>
             </div>
 
-            <div class="grid grid-cols-3 gap-4">
-                <div class="glass-panel p-4 rounded-lg text-center"><p class="text-xs text-slate-400">SGPA</p><h4 class="text-xl font-bold" id="prof-sgpa">8.5</h4></div>
-                <div class="glass-panel p-4 rounded-lg text-center"><p class="text-xs text-slate-400">CGPA</p><h4 class="text-xl font-bold" id="prof-cgpa">8.2</h4></div>
-                <div class="glass-panel p-4 rounded-lg text-center"><p class="text-xs text-slate-400">Attendance</p><h4 class="text-xl font-bold text-emerald-400">92%</h4></div>
+            <div class="grid grid-cols-3 gap-4 cursor-default">
+                <div class="glass-panel p-4 rounded-lg text-center hover:bg-slate-800 transition-colors"><p class="text-xs text-slate-400">SGPA</p><h4 class="text-2xl font-bold text-white" id="prof-sgpa">8.5</h4></div>
+                <div class="glass-panel p-4 rounded-lg text-center hover:bg-slate-800 transition-colors"><p class="text-xs text-slate-400">CGPA</p><h4 class="text-2xl font-bold text-white" id="prof-cgpa">8.2</h4></div>
+                <div class="glass-panel p-4 rounded-lg text-center hover:bg-slate-800 transition-colors"><p class="text-xs text-slate-400">Attendance</p><h4 class="text-2xl font-bold text-emerald-400">92%</h4></div>
             </div>
         </section>
 
         <section id="page-marks-entry" class="page-section">
             <h2 class="text-2xl font-bold mb-6">Tally Marks Register</h2>
-            <div class="glass-panel p-6 rounded-xl border border-blue-500/20">
+            <div class="glass-panel p-6 rounded-xl border border-blue-500/20 shadow-lg">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
                         <label class="block text-sm text-slate-400 mb-1">Select Student Roll No.</label>
-                        <select class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm outline-none">
+                        <select class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm outline-none cursor-pointer hover:border-blue-500 transition-colors">
                             <option>101 - Rishabh Kumar</option>
                             <option>102 - Amit Singh</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="border border-slate-700 rounded-lg p-4 bg-slate-800/30 mb-4">
+                <div class="border border-slate-700 rounded-lg p-5 bg-slate-800/30 mb-4 hover:border-blue-500/50 transition-colors">
                     <h4 class="text-sm font-semibold text-neonBlue mb-3">Add Subject Marks</h4>
-                    <div class="flex gap-3 items-end">
-                        <div class="flex-1"><label class="block text-xs mb-1">Subject</label><input type="text" placeholder="e.g. Physics" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></div>
-                        <div class="w-24"><label class="block text-xs mb-1">Max</label><input type="number" value="100" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></div>
-                        <div class="w-24"><label class="block text-xs mb-1">Obtained</label><input type="number" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></div>
-                        <button class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-sm font-bold transition">Add</button>
+                    <div class="flex gap-3 items-end flex-wrap">
+                        <div class="flex-1 min-w-[200px]"><label class="block text-xs mb-1 text-slate-400">Subject Name</label><input type="text" placeholder="e.g. Physics" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm focus:border-blue-500 outline-none transition-colors"></div>
+                        <div class="w-24"><label class="block text-xs mb-1 text-slate-400">Max</label><input type="number" value="100" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm focus:border-blue-500 outline-none transition-colors"></div>
+                        <div class="w-24"><label class="block text-xs mb-1 text-slate-400">Obtained</label><input type="number" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded p-2.5 text-sm focus:border-blue-500 outline-none transition-colors"></div>
+                        <button class="bg-emerald-600 hover:bg-emerald-500 px-6 py-2.5 rounded text-sm font-bold shadow-lg transition-all transform hover:scale-105 active:scale-95 cursor-pointer">Add</button>
                     </div>
                 </div>
             </div>
@@ -260,37 +287,15 @@
         <section id="page-reports" class="page-section">
             <h2 class="text-2xl font-bold mb-6">Generate Official Reports</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="glass-panel p-6 rounded-xl text-center border border-dashed border-slate-600">
-                    <i class="fas fa-file-pdf text-4xl text-red-400 mb-3"></i>
-                    <h3 class="text-lg font-bold mb-2">Student Marksheet</h3>
-                    <p class="text-sm text-slate-400 mb-4">Download strictly formatted academic record for current profile.</p>
-                    <button onclick="nav('student-profile')" class="bg-blue-600 px-6 py-2 rounded-lg text-sm font-bold shadow-lg">Go to Profile to Print</button>
+                <div class="glass-panel p-8 rounded-xl text-center border-2 border-dashed border-slate-600 hover:border-blue-500 transition-colors group cursor-pointer" onclick="nav('student-profile')">
+                    <i class="fas fa-file-pdf text-5xl text-red-400 mb-4 group-hover:scale-110 transition-transform"></i>
+                    <h3 class="text-xl font-bold mb-2">Student Marksheet</h3>
+                    <p class="text-sm text-slate-400 mb-6">Download strictly formatted academic record for current profile.</p>
+                    <button class="bg-blue-600 hover:bg-blue-500 px-6 py-2.5 rounded-lg text-sm font-bold shadow-lg transition-all">Go to Profile to Print</button>
                 </div>
             </div>
         </section>
 
         <div id="pdf-wrapper" style="display: none; position: absolute; left: -9999px;">
             <div id="print-template" style="width: 800px; padding: 40px; background: white; color: black; font-family: Arial, sans-serif;">
-                <div style="text-align: center; border-bottom: 3px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 30px;">
-                    <h1 style="font-size: 32px; font-weight: 800; color: #1e3a8a; margin: 0; text-transform: uppercase;" id="pdf-col">ABC COLLEGE</h1>
-                    <p style="font-size: 14px; color: #475569; font-weight: 600; margin-top: 5px;">Official Academic Transcript - Powered by P for Problem</p>
-                </div>
-                <table style="width: 100%; margin-bottom: 30px; font-size: 15px; border-collapse: separate; border-spacing: 0 8px;">
-                    <tr>
-                        <td><strong>Student Name:</strong> <span id="pdf-name">Rishabh Kumar</span></td>
-                        <td style="text-align: right;"><strong>Roll No:</strong> <span id="pdf-roll">101</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Father's Name:</strong> <span id="pdf-fname-val">Rajesh Kumar</span></td>
-                        <td style="text-align: right;"><strong>Course & Sec:</strong> <span id="pdf-sec-val">BCA (Sec A)</span></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Email ID:</strong> <span id="pdf-mail-val">rishabh@gmail.com</span></td>
-                        <td style="text-align: right;"><strong>Status:</strong> <span style="color: green; font-weight: bold;">REGULAR</span></td>
-                    </tr>
-                </table>
-                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
-                    <thead>
-                        <tr style="background-color: #f1f5f9;">
-                            <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: left;">Subject</th>
-                            <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: center;">Max Ma
+                <div style="text-align: center; border-bottom: 3px solid #1e3a8a; padding-bottom: 20px; mar
