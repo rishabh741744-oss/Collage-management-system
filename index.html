@@ -3,285 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduVerse | Student Management System</title>
-    
+    <title>Team P for Problem | Student Management</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r121/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.waves.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
-        
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #020617;
-            color: #f8fafc;
-            overflow: hidden;
+        @keyframes swing {
+            0% { transform: rotate(-10deg); }
+            50% { transform: rotate(10deg); }
+            100% { transform: rotate(-10deg); }
         }
-
-        .glass-sidebar {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(20px);
-            border-right: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .glass-card {
-            background: rgba(30, 41, 59, 0.5);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 16px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            transition: 0.3s;
-            color: #94a3b8;
+        .cute-character {
+            display: inline-block;
+            animation: swing 2s ease-in-out infinite;
             cursor: pointer;
         }
-
-        .nav-item:hover, .nav-item.active {
-            background: rgba(99, 102, 241, 0.15);
-            color: #818cf8;
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
         }
-
-        #vanta-canvas {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            z-index: -1;
+        body {
+            background: linear-gradient(135deg, #1e1e2f 0%, #111119 100%);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
         }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .book-container {
+            perspective: 1000px;
+        }
+        .book {
+            transition: transform 1s;
+            transform-style: preserve-3d;
+        }
+        .book:hover {
+            transform: rotateY(-30deg);
+        }
     </style>
 </head>
 <body>
 
-    <div id="vanta-canvas"></div>
-
-    <div id="loginOverlay" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md">
-        <div class="glass-card p-10 w-full max-w-md shadow-2xl text-center">
-            <h1 class="text-3xl font-bold mb-6 text-indigo-400">EduVerse Login</h1>
-            <div class="space-y-4">
-                <select id="loginRole" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl outline-none">
-                    <option value="admin">Administrator</option>
-                    <option value="student">Student Portal</option>
-                </select>
-                <input type="text" id="username" placeholder="Username" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl focus:border-indigo-500 outline-none">
-                <input type="password" id="password" placeholder="Password" class="w-full bg-slate-800 border border-slate-700 p-3 rounded-xl focus:border-indigo-500 outline-none">
-                <button onclick="startSystem()" class="w-full bg-indigo-600 hover:bg-indigo-500 py-3 rounded-xl font-bold transition-all shadow-lg shadow-indigo-500/20">Login to System</button>
-            </div>
+    <nav class="p-6 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-blue-400">P for Problem <span class="text-sm font-light text-gray-400">x Firebox</span></h1>
+        <div id="logout-container" class="cursor-pointer flex items-center gap-2 hover:text-red-400 transition-all">
+            <span id="logout-text">Logout</span>
+            <i data-lucide="log-out" id="logout-icon"></i>
         </div>
-    </div>
+    </nav>
 
-    <div id="appShell" class="flex h-screen opacity-0 transition-opacity duration-700">
-        <aside class="w-64 glass-sidebar p-6 flex flex-col gap-8">
-            <div class="flex items-center gap-3 px-2">
-                <div class="bg-indigo-600 p-2 rounded-lg"><i data-lucide="graduation-cap"></i></div>
-                <span class="font-bold text-xl tracking-tight">EDUVERSE</span>
-            </div>
-
-            <nav class="flex flex-col gap-2">
-                <div onclick="showPage('overview')" class="nav-item active" id="nav-overview"><i data-lucide="layout-grid"></i> Dashboard</div>
-                <div onclick="showPage('students')" class="nav-item" id="nav-students"><i data-lucide="users"></i> Students</div>
-                <div onclick="showPage('attendance')" class="nav-item" id="nav-attendance"><i data-lucide="calendar-check"></i> Attendance</div>
-                <div id="adminSettings" class="nav-item"><i data-lucide="settings"></i> Control Panel</div>
-            </nav>
-
-            <div class="mt-auto">
-                <button onclick="location.reload()" class="flex items-center gap-2 text-red-400 hover:bg-red-500/10 w-full p-3 rounded-xl transition">
-                    <i data-lucide="log-out"></i> Logout
-                </button>
-            </div>
-        </aside>
-
-        <main class="flex-1 overflow-y-auto p-8">
-            <header class="flex justify-between items-center mb-8">
-                <div>
-                    <h2 class="text-2xl font-bold" id="pageTitle">Dashboard Overview</h2>
-                    <p class="text-slate-400 text-sm">Welcome back, <span id="displayUser">Admin</span></p>
-                </div>
-                <div id="adminActions" class="hidden">
-                    <button onclick="openModal()" class="bg-indigo-600 hover:bg-indigo-500 px-6 py-2.5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-indigo-500/30">
-                        <i data-lucide="plus" class="w-5 h-5"></i> Add New Student
-                    </button>
-                </div>
-            </header>
-
-            <div id="overviewPage" class="page-section">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="glass-card p-6 flex items-center gap-5">
-                        <div class="bg-blue-500/20 p-4 rounded-2xl text-blue-400"><i data-lucide="user-plus"></i></div>
-                        <div><p class="text-slate-400 text-sm font-medium">Total Students</p><h3 class="text-2xl font-bold">482</h3></div>
+    <main class="container mx-auto px-4 py-10">
+        
+        <div class="flex flex-col lg:flex-row items-center justify-around gap-10">
+            <div class="book-container w-full max-w-md">
+                <div class="book glass p-8 shadow-2xl relative">
+                    <div class="absolute -top-12 left-1/2 -translate-x-1/2 text-5xl cute-character">
+                        🦉
+                        <div class="text-xs text-blue-300 font-mono mt-1">Legs Swinging...</div>
                     </div>
-                    <div class="glass-card p-6 flex items-center gap-5">
-                        <div class="bg-green-500/20 p-4 rounded-2xl text-green-400"><i data-lucide="activity"></i></div>
-                        <div><p class="text-slate-400 text-sm font-medium">Avg. Attendance</p><h3 class="text-2xl font-bold">94.2%</h3></div>
-                    </div>
-                    <div class="glass-card p-6 flex items-center gap-5">
-                        <div class="bg-purple-500/20 p-4 rounded-2xl text-purple-400"><i data-lucide="award"></i></div>
-                        <div><p class="text-slate-400 text-sm font-medium">Avg. CGPA</p><h3 class="text-2xl font-bold">8.75</h3></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="glass-card p-6">
-                        <h4 class="font-bold mb-4">Monthly Attendance Trend</h4>
-                        <canvas id="statChart" height="200"></canvas>
-                    </div>
-                    <div class="glass-card p-6">
-                        <h4 class="font-bold mb-4">Recent Announcements</h4>
-                        <div class="space-y-4">
-                            <div class="bg-slate-800/50 p-4 rounded-xl border-l-4 border-indigo-500">
-                                <p class="text-sm font-semibold">Mid-Semester Exams</p>
-                                <p class="text-xs text-slate-400">Exams will start from May 15th, 2026.</p>
-                            </div>
+                    
+                    <h2 class="text-3xl font-bold mb-6 text-center">Student Portal</h2>
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-sm mb-1 text-gray-300">Student ID</label>
+                            <input type="text" class="w-full bg-gray-800 border border-gray-700 rounded p-3 focus:border-blue-500 outline-none transition" placeholder="Enter ID...">
                         </div>
+                        <div>
+                            <label class="block text-sm mb-1 text-gray-300">Password</label>
+                            <input type="password" class="w-full bg-gray-800 border border-gray-700 rounded p-3 focus:border-blue-500 outline-none transition" placeholder="••••••••">
+                        </div>
+                        <button type="button" onclick="showDashboard()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-lg transform hover:scale-105 transition">
+                            Open Dashboard (Sync with Firebox)
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="dashboard" class="w-full lg:w-2/3 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="glass p-6 text-center">
+                        <i data-lucide="users" class="mx-auto mb-2 text-blue-400"></i>
+                        <h3 class="text-gray-400">Total Students</h3>
+                        <p class="text-2xl font-bold">1,250</p>
+                    </div>
+                    <div class="glass p-6 text-center">
+                        <i data-lucide="book-open" class="mx-auto mb-2 text-green-400"></i>
+                        <h3 class="text-gray-400">Active Courses</h3>
+                        <p class="text-2xl font-bold">48</p>
+                    </div>
+                    <div class="glass p-6 text-center">
+                        <i data-lucide="database" class="mx-auto mb-2 text-purple-400"></i>
+                        <h3 class="text-gray-400">Firebox Storage</h3>
+                        <p class="text-2xl font-bold text-sm">85% Optimized</p>
+                    </div>
+                </div>
+
+                <div class="glass p-8">
+                    <h3 class="text-xl font-semibold mb-4 flex items-center gap-2">
+                        <i data-lucide="bar-chart-3"></i> Attendance Analytics
+                    </h3>
+                    <div class="h-32 w-full flex items-end gap-2">
+                        <div class="bg-blue-500 w-full rounded-t" style="height: 60%"></div>
+                        <div class="bg-blue-500 w-full rounded-t" style="height: 80%"></div>
+                        <div class="bg-blue-400 w-full rounded-t" style="height: 40%"></div>
+                        <div class="bg-blue-600 w-full rounded-t" style="height: 90%"></div>
+                        <div class="bg-blue-300 w-full rounded-t" style="height: 70%"></div>
                     </div>
                 </div>
             </div>
-
-            <div id="studentsPage" class="page-section hidden">
-                <div class="glass-card overflow-hidden">
-                    <table class="w-full text-left">
-                        <thead class="bg-slate-800/50 text-slate-400 text-xs uppercase tracking-wider">
-                            <tr>
-                                <th class="p-5">Student Name</th>
-                                <th class="p-5">Roll Number</th>
-                                <th class="p-5">CGPA</th>
-                                <th class="p-5">Section</th>
-                                <th class="p-5">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="studentListTable" class="text-sm text-slate-200">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <div id="studentModal" class="fixed inset-0 z-[60] hidden flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div class="glass-card p-8 w-full max-w-lg">
-            <h3 class="text-xl font-bold mb-6">Add New Student Entry</h3>
-            <div class="grid grid-cols-2 gap-4">
-                <input id="newName" placeholder="Full Name" class="bg-slate-800 p-3 rounded-xl outline-none col-span-2">
-                <input id="newRoll" placeholder="Roll No" class="bg-slate-800 p-3 rounded-xl outline-none">
-                <input id="newCGPA" placeholder="CGPA" class="bg-slate-800 p-3 rounded-xl outline-none">
-                <select id="newSection" class="bg-slate-800 p-3 rounded-xl outline-none">
-                    <option>Section A</option>
-                    <option>Section B</option>
-                    <option>Section C</option>
-                </select>
-                <button onclick="closeModal()" class="bg-slate-700 py-3 rounded-xl font-bold">Cancel</button>
-                <button onclick="saveStudent()" class="bg-indigo-600 py-3 rounded-xl font-bold">Save Record</button>
-            </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        let currentUserRole = 'student';
-
-        // 3D Background
-        VANTA.WAVES({
-            el: "#vanta-canvas",
-            mouseControls: true,
-            touchControls: true,
-            color: 0x020617,
-            waveHeight: 15,
-            shininess: 30,
-            waveSpeed: 0.5
-        });
-
+        // Initialize Icons
         lucide.createIcons();
 
-        function startSystem() {
-            const role = document.getElementById('loginRole').value;
-            currentUserRole = role;
-            
-            document.getElementById('loginOverlay').classList.add('hidden');
-            document.getElementById('appShell').style.opacity = '1';
-            document.getElementById('displayUser').innerText = role === 'admin' ? 'Administrator' : 'Student User';
-            
-            if(role === 'admin') {
-                document.getElementById('adminActions').classList.remove('hidden');
-                document.getElementById('adminSettings').classList.remove('hidden');
-            } else {
-                document.getElementById('adminSettings').classList.add('hidden');
-            }
-            
-            initChart();
-            loadTable();
-        }
+        // Logout Animation (Bird stealing text concept)
+        const logoutBtn = document.getElementById('logout-container');
+        const logoutText = document.getElementById('logout-text');
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page-section').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-            
-            document.getElementById(pageId + 'Page').classList.remove('hidden');
-            document.getElementById('nav-' + pageId).classList.add('active');
-            document.getElementById('pageTitle').innerText = pageId.charAt(0).toUpperCase() + pageId.slice(1);
-        }
+        logoutBtn.addEventListener('mouseenter', () => {
+            logoutText.style.transition = "all 0.5s ease";
+            logoutText.style.transform = "translateY(-50px) rotate(15deg)";
+            logoutText.style.opacity = "0";
+            setTimeout(() => {
+                logoutText.innerText = "Bye!";
+                logoutText.style.transform = "translateY(0) rotate(0)";
+                logoutText.style.opacity = "1";
+            }, 500);
+        });
 
-        function loadTable() {
-            const students = [
-                {name: "Rishabh Singh", roll: "220101", gpa: "9.5", sec: "A"},
-                {name: "Aprajita Sharma", roll: "220102", gpa: "9.2", sec: "B"},
-                {name: "Arnav Singh", roll: "220103", gpa: "8.9", sec: "A"}
-            ];
-
-            const tbody = document.getElementById('studentListTable');
-            tbody.innerHTML = students.map(s => `
-                <tr class="border-b border-white/5 hover:bg-white/5 transition">
-                    <td class="p-5 font-semibold">${s.name}</td>
-                    <td class="p-5 text-slate-400">${s.roll}</td>
-                    <td class="p-5"><span class="text-indigo-400 font-bold">${s.gpa}</span></td>
-                    <td class="p-5">${s.sec}</td>
-                    <td class="p-5">
-                        <div class="flex gap-3">
-                            <button title="View Profile" class="p-2 hover:bg-indigo-500/20 rounded-lg text-indigo-400"><i data-lucide="eye" class="w-4 h-4"></i></button>
-                            ${currentUserRole === 'admin' ? `
-                                <button title="Edit" class="p-2 hover:bg-amber-500/20 rounded-lg text-amber-400"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
-                                <button title="Delete" class="p-2 hover:bg-red-500/20 rounded-lg text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                            ` : ''}
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-            lucide.createIcons();
-        }
-
-        function openModal() { document.getElementById('studentModal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('studentModal').classList.add('hidden'); }
-
-        function initChart() {
-            const ctx = document.getElementById('statChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr'],
-                    datasets: [{
-                        label: 'Attendance %',
-                        data: [85, 92, 88, 95],
-                        borderColor: '#6366f1',
-                        tension: 0.4,
-                        fill: false
-                    }]
-                },
-                options: {
-                    plugins: { legend: { display: false } },
-                    scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' } }, x: { grid: { display: false } } }
-                }
-            });
+        // Simple Dashboard Toggle
+        function showDashboard() {
+            alert("Syncing with Firebox... Login Successful!");
+            document.getElementById('dashboard').scrollIntoView({ behavior: 'smooth' });
         }
     </script>
 </body>
-    </html>
-    
+</html>
