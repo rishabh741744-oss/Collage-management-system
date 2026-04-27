@@ -3,10 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P for Problem | Firebox System</title>
+    <title>P for Problem v2.0 | Professional SMS</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -16,419 +15,282 @@
             theme: {
                 extend: {
                     colors: {
-                        darkBg: '#0f172a',
-                        cardBg: '#1e293b',
-                        brandBlue: '#3b82f6'
+                        deepBlue: '#0b1120',
+                        glassBg: 'rgba(30, 41, 59, 0.6)',
+                        glassBorder: 'rgba(255, 255, 255, 0.08)',
+                        neonBlue: '#3b82f6'
                     }
                 }
             }
         }
     </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0b1120; color: #f8fafc; overflow: hidden; }
         
-        /* Smooth Fade Transitions */
-        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
-        .fade-out { animation: fadeOut 0.4s ease-out forwards; }
+        .glass-panel {
+            background: var(--glassBg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glassBorder);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .neon-text { color: #60a5fa; text-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+        .neon-border { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        
+        .page-section { display: none; animation: fadeIn 0.3s ease-in-out; }
+        .active-page { display: block; }
+        
+        .nav-item.active { background: rgba(59, 130, 246, 0.15); border-left: 3px solid #3b82f6; color: #60a5fa; }
+        
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
-        
-        .active-nav { background-color: #3b82f6; color: white; border-radius: 0.5rem; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-        
-        /* Hidden class for SPA logic */
-        .hidden-section { display: none !important; }
 
-        /* PDF Styling - Hidden from UI, only used for download */
-        #pdf-template { background: white; color: black; padding: 40px; width: 800px; display: none; }
+        /* Custom Scrollbar for dark theme */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        .student-only { display: none; }
+        .admin-only { display: none; }
     </style>
 </head>
-<body class="h-screen w-screen overflow-hidden flex bg-darkBg text-white">
+<body class="h-screen w-screen flex flex-col md:flex-row">
 
-    <div id="login-gate" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-darkBg px-4">
-        <div class="mb-8 text-center">
-            <h1 class="text-4xl font-bold tracking-tight text-brandBlue mb-2">P for Problem</h1>
-            <p class="text-gray-400">Powered by Firebox Storage</p>
-        </div>
-        
-        <div class="glass-card p-8 rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
-            <h2 class="text-2xl font-semibold mb-6 text-white text-center">Secure Login</h2>
-            
-            <form id="auth-form" onsubmit="processLogin(event)">
-                <div class="space-y-5">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Admin ID / Student Roll No</label>
-                        <div class="relative">
-                            <i class="fas fa-user absolute left-3 top-3.5 text-gray-500"></i>
-                            <input type="text" required class="w-full bg-slate-800 border border-slate-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-brandBlue focus:ring-1 focus:ring-brandBlue transition" placeholder="Enter ID">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
-                        <div class="relative">
-                            <i class="fas fa-lock absolute left-3 top-3.5 text-gray-500"></i>
-                            <input type="password" required class="w-full bg-slate-800 border border-slate-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-brandBlue focus:ring-1 focus:ring-brandBlue transition" placeholder="••••••••">
-                        </div>
-                    </div>
-                    <button type="submit" id="login-btn" class="w-full bg-brandBlue hover:bg-blue-600 text-white font-semibold py-3 rounded-lg shadow-lg shadow-blue-500/30 transition-all duration-200 mt-4 flex justify-center items-center gap-2">
-                        <span>Access Portal</span> <i class="fas fa-arrow-right"></i>
-                    </button>
+    <div id="login-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-deepBlue">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
+        <div class="glass-panel p-10 rounded-2xl w-full max-w-md relative z-10 neon-border">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold neon-text mb-2">P for Problem</h1>
+                <p class="text-slate-400 text-sm">v2.0 Professional Portal</p>
+            </div>
+            <form onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm text-slate-300 mb-2">Login Role</label>
+                    <select id="login-role" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue">
+                        <option value="admin">Administrator (Admin)</option>
+                        <option value="student">Student (View Only)</option>
+                    </select>
                 </div>
+                <div class="mb-4">
+                    <label class="block text-sm text-slate-300 mb-2">Roll Number / Admin ID</label>
+                    <input type="text" id="login-id" value="admin" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue">
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm text-slate-300 mb-2">Password</label>
+                    <input type="password" value="admin123" class="w-full bg-slate-800/50 border border-slate-600 rounded-lg p-3 text-white focus:outline-none focus:border-neonBlue">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg shadow-[0_0_15px_rgba(59,130,246,0.5)] transition-all">
+                    Secure Login
+                </button>
             </form>
         </div>
     </div>
 
-    <div id="main-app" class="hidden-section w-full h-full flex flex-col md:flex-row">
-        
-        <nav class="w-full md:w-64 bg-cardBg border-b md:border-b-0 md:border-r border-slate-700 flex flex-col justify-between z-10 shrink-0">
-            <div>
-                <div class="p-6 hidden md:block">
-                    <h2 class="text-xl font-bold text-brandBlue">P for Problem</h2>
-                    <p class="text-xs text-gray-400 mt-1">v2.0 Professional</p>
-                </div>
-                <div class="flex md:flex-col p-2 md:p-4 gap-1 overflow-x-auto md:overflow-visible">
-                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active-nav flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all whitespace-nowrap">
-                        <i class="fas fa-chart-pie"></i> <span class="hidden md:inline">Dashboard</span>
-                    </button>
-                    <button onclick="switchTab('attendance')" id="nav-attendance" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white transition-all whitespace-nowrap rounded-lg">
-                        <i class="fas fa-users"></i> <span class="hidden md:inline">Attendance</span>
-                    </button>
-                    <button onclick="switchTab('reports')" id="nav-reports" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white transition-all whitespace-nowrap rounded-lg">
-                        <i class="fas fa-file-export"></i> <span class="hidden md:inline">Reports & Downloads</span>
-                    </button>
-                </div>
+    <aside id="sidebar" class="w-full md:w-64 glass-panel border-r border-slate-800 flex flex-col justify-between hidden h-full z-20 shrink-0">
+        <div class="h-full overflow-y-auto pb-20">
+            <div class="p-6 border-b border-slate-800/50">
+                <h2 class="text-xl font-bold neon-text flex items-center gap-2">
+                    <i class="fas fa-layer-group"></i> P for Problem
+                </h2>
+                <p id="display-college-name" class="text-xs text-slate-400 mt-1 uppercase tracking-wider">ABC College</p>
             </div>
-            
-            <div class="p-4 hidden md:block border-t border-slate-700">
-                <button onclick="processLogout()" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors">
-                    <i class="fas fa-sign-out-alt"></i> Secure Logout
-                </button>
-            </div>
-        </nav>
-
-        <main class="flex-1 bg-darkBg overflow-y-auto p-4 md:p-8 relative">
-            
-            <div class="md:hidden flex justify-between items-center mb-6">
-                <h2 class="text-lg font-bold text-brandBlue">P for Problem</h2>
-                <button onclick="processLogout()" class="text-red-400 text-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </div>
-
-            <div id="tab-dashboard" class="tab-content fade-in">
-                <h3 class="text-2xl font-bold mb-6">System Overview</h3>
+            <nav class="mt-4 flex flex-col gap-1 px-2">
+                <button onclick="nav('dashboard')" id="nav-dashboard" class="nav-item active flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-home w-5"></i> Dashboard</button>
+                <button onclick="nav('students-list')" id="nav-students-list" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-users w-5"></i> Students List</button>
                 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div class="glass-card p-5 rounded-xl border-t-2 border-t-blue-500">
-                        <p class="text-gray-400 text-sm mb-1">Total Students</p>
-                        <h4 class="text-2xl md:text-3xl font-bold">1,250</h4>
-                    </div>
-                    <div class="glass-card p-5 rounded-xl border-t-2 border-t-emerald-500">
-                        <p class="text-gray-400 text-sm mb-1">Avg Attendance</p>
-                        <h4 class="text-2xl md:text-3xl font-bold">88%</h4>
-                    </div>
-                    <div class="glass-card p-5 rounded-xl border-t-2 border-t-purple-500">
-                        <p class="text-gray-400 text-sm mb-1">Active Courses</p>
-                        <h4 class="text-2xl md:text-3xl font-bold">48</h4>
-                    </div>
-                    <div class="glass-card p-5 rounded-xl border-t-2 border-t-orange-500">
-                        <p class="text-gray-400 text-sm mb-1">Firebox Sync</p>
-                        <h4 class="text-lg font-bold text-emerald-400 mt-2"><i class="fas fa-cloud-check"></i> Optimized</h4>
+                <button onclick="nav('student-profile')" id="nav-student-profile" class="nav-item student-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-user-circle w-5"></i> My Profile</button>
+                
+                <button onclick="nav('add-student')" id="nav-add-student" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-user-plus w-5"></i> Add Student</button>
+                <button onclick="nav('marks-entry')" id="nav-marks-entry" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-edit w-5"></i> Marks Entry (Tally)</button>
+                
+                <button onclick="nav('attendance')" id="nav-attendance" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-calendar-check w-5"></i> Attendance</button>
+                <button onclick="nav('performance')" id="nav-performance" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-chart-line w-5"></i> Performance</button>
+                <button onclick="nav('reports')" id="nav-reports" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-file-pdf w-5"></i> Reports & PDF</button>
+                <button onclick="nav('notice-board')" id="nav-notice-board" class="nav-item flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-bullhorn w-5"></i> Notice Board</button>
+                
+                <button onclick="nav('settings')" id="nav-settings" class="nav-item admin-only flex items-center gap-3 px-4 py-3 rounded-lg text-sm text-slate-300 transition-all"><i class="fas fa-cog w-5"></i> Settings</button>
+            </nav>
+        </div>
+        <div class="absolute bottom-0 w-full p-4 glass-panel border-t border-slate-800">
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 py-2 rounded-lg text-sm font-semibold transition-all">
+                <i class="fas fa-power-off"></i> Logout <span id="role-badge" class="uppercase text-xs ml-1 opacity-70"></span>
+            </button>
+        </div>
+    </aside>
+
+    <main id="main-content" class="flex-1 h-full overflow-y-auto p-4 md:p-8 hidden relative">
+        
+        <section id="page-dashboard" class="page-section active-page">
+            <div class="flex justify-between items-center mb-8">
+                <div>
+                    <h2 class="text-2xl font-bold">Welcome back!</h2>
+                    <p class="text-slate-400 text-sm">Here is what's happening today.</p>
+                </div>
+                <div class="bg-blue-500/20 text-blue-400 px-4 py-2 rounded-lg text-sm font-semibold border border-blue-500/30">
+                    <i class="fas fa-check-circle"></i> System Live
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-blue-500">
+                    <p class="text-slate-400 text-sm mb-1">Total Students</p>
+                    <h3 class="text-3xl font-bold">1,024</h3>
+                </div>
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-emerald-500">
+                    <p class="text-slate-400 text-sm mb-1">Avg Institute Attendance</p>
+                    <h3 class="text-3xl font-bold">92%</h3>
+                </div>
+                <div class="glass-panel p-6 rounded-xl border-l-4 border-l-purple-500">
+                    <p class="text-slate-400 text-sm mb-1">Latest Notice</p>
+                    <h3 class="text-lg font-bold mt-1 text-purple-400 truncate">Mid Term Exams Scheduled</h3>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-students-list" class="page-section">
+            <h2 class="text-2xl font-bold mb-6">Class Directory</h2>
+            <div class="glass-panel rounded-xl overflow-hidden">
+                <div class="p-4 border-b border-slate-700/50 flex justify-between items-center">
+                    <div class="flex gap-4">
+                        <select class="bg-slate-800 border border-slate-600 rounded px-3 py-1.5 text-sm outline-none">
+                            <option>Section A</option>
+                            <option>Section B</option>
+                        </select>
+                        <span class="text-sm text-slate-400 self-center">Showing 60 students</span>
                     </div>
                 </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-slate-800/50 text-slate-400 text-sm">
+                            <tr>
+                                <th class="p-4 font-medium">Roll No</th>
+                                <th class="p-4 font-medium">Student Name</th>
+                                <th class="p-4 font-medium">Section</th>
+                                <th class="p-4 font-medium">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/30 text-sm" id="student-list-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
 
-                <div class="glass-card p-4 md:p-6 rounded-xl w-full">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-lg font-semibold">Attendance Analytics</h3>
-                        <select class="bg-slate-800 border border-slate-700 text-sm rounded px-2 py-1 outline-none">
-                            <option>This Week</option>
-                            <option>This Month</option>
+        <section id="page-student-profile" class="page-section">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Student Biodata</h2>
+                <div class="flex gap-2">
+                    <button class="admin-only bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded text-sm transition"><i class="fas fa-edit"></i> Edit</button>
+                    <button onclick="generatePDF()" class="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded text-sm font-semibold shadow-lg shadow-blue-500/20 transition"><i class="fas fa-download"></i> Marksheet PDF</button>
+                </div>
+            </div>
+
+            <div class="glass-panel p-6 rounded-xl flex flex-col md:flex-row gap-6 items-start mb-6">
+                <div class="w-24 h-24 rounded-xl bg-slate-700 flex items-center justify-center text-3xl font-bold text-slate-400 shadow-inner">
+                    <span id="prof-init">R</span>
+                </div>
+                <div class="flex-1 grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-6 text-sm">
+                    <div><p class="text-slate-500 mb-1">Full Name</p><p class="font-semibold text-lg" id="prof-name">Rishabh Kumar</p></div>
+                    <div><p class="text-slate-500 mb-1">Roll Number</p><p class="font-semibold text-lg text-neonBlue" id="prof-roll">101</p></div>
+                    <div><p class="text-slate-500 mb-1">Section & Course</p><p class="font-semibold" id="prof-sec">Section A • BCA</p></div>
+                    <div><p class="text-slate-500 mb-1">Father's Name</p><p class="font-semibold" id="prof-fname">Rajesh Kumar</p></div>
+                    <div><p class="text-slate-500 mb-1">College</p><p class="font-semibold text-emerald-400" id="prof-col">ABC College</p></div>
+                    <div><p class="text-slate-500 mb-1">Email ID</p><p class="font-semibold text-slate-300" id="prof-mail">rishabh@gmail.com</p></div>
+                </div>
+            </div>
+
+            <h3 class="text-lg font-bold mb-3 border-b border-slate-700 pb-2">Academic Record (Tally Type)</h3>
+            <div class="glass-panel rounded-xl overflow-hidden mb-6">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-800/80 text-slate-300 border-b border-slate-600">
+                        <tr>
+                            <th class="p-3">Subject Name</th>
+                            <th class="p-3 text-center">Max Marks</th>
+                            <th class="p-3 text-center">Obtained</th>
+                            <th class="p-3 text-right">Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody id="prof-marks-body" class="divide-y divide-slate-700/50">
+                        </tbody>
+                    <tfoot class="bg-blue-900/20 border-t border-blue-500/30 font-bold">
+                        <tr>
+                            <td class="p-3 text-neonBlue">GRAND TOTAL</td>
+                            <td class="p-3 text-center" id="prof-max">200</td>
+                            <td class="p-3 text-center text-emerald-400" id="prof-ob">163</td>
+                            <td class="p-3 text-right text-emerald-400" id="prof-perc">81.5%</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <div class="glass-panel p-4 rounded-lg text-center"><p class="text-xs text-slate-400">SGPA</p><h4 class="text-xl font-bold" id="prof-sgpa">8.5</h4></div>
+                <div class="glass-panel p-4 rounded-lg text-center"><p class="text-xs text-slate-400">CGPA</p><h4 class="text-xl font-bold" id="prof-cgpa">8.2</h4></div>
+                <div class="glass-panel p-4 rounded-lg text-center"><p class="text-xs text-slate-400">Attendance</p><h4 class="text-xl font-bold text-emerald-400">92%</h4></div>
+            </div>
+        </section>
+
+        <section id="page-marks-entry" class="page-section">
+            <h2 class="text-2xl font-bold mb-6">Tally Marks Register</h2>
+            <div class="glass-panel p-6 rounded-xl border border-blue-500/20">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div>
+                        <label class="block text-sm text-slate-400 mb-1">Select Student Roll No.</label>
+                        <select class="w-full bg-slate-800 border border-slate-600 rounded p-2 text-sm outline-none">
+                            <option>101 - Rishabh Kumar</option>
+                            <option>102 - Amit Singh</option>
                         </select>
                     </div>
-                    <div class="w-full h-64 md:h-80">
-                        <canvas id="mainChart"></canvas>
+                </div>
+
+                <div class="border border-slate-700 rounded-lg p-4 bg-slate-800/30 mb-4">
+                    <h4 class="text-sm font-semibold text-neonBlue mb-3">Add Subject Marks</h4>
+                    <div class="flex gap-3 items-end">
+                        <div class="flex-1"><label class="block text-xs mb-1">Subject</label><input type="text" placeholder="e.g. Physics" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></div>
+                        <div class="w-24"><label class="block text-xs mb-1">Max</label><input type="number" value="100" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></div>
+                        <div class="w-24"><label class="block text-xs mb-1">Obtained</label><input type="number" placeholder="0" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-sm"></div>
+                        <button class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded text-sm font-bold transition">Add</button>
                     </div>
                 </div>
             </div>
+        </section>
 
-            <div id="tab-attendance" class="tab-content hidden-section fade-in">
-                <h3 class="text-2xl font-bold mb-6">Manage Attendance</h3>
-                
-                <div class="glass-card rounded-xl overflow-hidden">
-                    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
-                        <input type="text" placeholder="Search student..." class="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brandBlue w-full md:w-64">
-                    </div>
-                    <div class="overflow-x-auto w-full">
-                        <table class="w-full text-left whitespace-nowrap">
-                            <thead class="bg-slate-800/80 text-gray-400 text-sm uppercase tracking-wider">
-                                <tr>
-                                    <th class="px-6 py-4 font-medium">Roll No</th>
-                                    <th class="px-6 py-4 font-medium">Name</th>
-                                    <th class="px-6 py-4 font-medium">Course</th>
-                                    <th class="px-6 py-4 font-medium">Status</th>
-                                    <th class="px-6 py-4 font-medium">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-700/50">
-                                <tr class="hover:bg-slate-800/30 transition-colors">
-                                    <td class="px-6 py-4 text-sm">CSE-201</td>
-                                    <td class="px-6 py-4 font-medium flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">R</div>
-                                        Rishabh
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-400 text-sm">B.Tech CSE</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Present</span>
-                                    </td>
-                                    <td class="px-6 py-4"><button class="text-brandBlue hover:text-blue-400 text-sm font-medium">Edit</button></td>
-                                </tr>
-                                <tr class="hover:bg-slate-800/30 transition-colors">
-                                    <td class="px-6 py-4 text-sm">CSE-202</td>
-                                    <td class="px-6 py-4 font-medium flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">A</div>
-                                        Aprajita
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-400 text-sm">B.Tech CSE</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Present</span>
-                                    </td>
-                                    <td class="px-6 py-4"><button class="text-brandBlue hover:text-blue-400 text-sm font-medium">Edit</button></td>
-                                </tr>
-                                <tr class="hover:bg-slate-800/30 transition-colors">
-                                    <td class="px-6 py-4 text-sm">CSE-203</td>
-                                    <td class="px-6 py-4 font-medium flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold">A</div>
-                                        Arnav
-                                    </td>
-                                    <td class="px-6 py-4 text-gray-400 text-sm">B.Tech CSE</td>
-                                    <td class="px-6 py-4">
-                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">Absent</span>
-                                    </td>
-                                    <td class="px-6 py-4"><button class="text-brandBlue hover:text-blue-400 text-sm font-medium">Edit</button></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+        <section id="page-reports" class="page-section">
+            <h2 class="text-2xl font-bold mb-6">Generate Official Reports</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-panel p-6 rounded-xl text-center border border-dashed border-slate-600">
+                    <i class="fas fa-file-pdf text-4xl text-red-400 mb-3"></i>
+                    <h3 class="text-lg font-bold mb-2">Student Marksheet</h3>
+                    <p class="text-sm text-slate-400 mb-4">Download strictly formatted academic record for current profile.</p>
+                    <button onclick="nav('student-profile')" class="bg-blue-600 px-6 py-2 rounded-lg text-sm font-bold shadow-lg">Go to Profile to Print</button>
                 </div>
             </div>
+        </section>
 
-            <div id="tab-reports" class="tab-content hidden-section fade-in">
-                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
-                    <div>
-                        <h3 class="text-2xl font-bold">Generate Official Reports</h3>
-                        <p class="text-gray-400 text-sm mt-1">Download strictly formatted academic documents.</p>
-                    </div>
-                    <button onclick="downloadDocument()" class="bg-brandBlue hover:bg-blue-600 text-white font-medium py-2.5 px-6 rounded-lg shadow-lg flex items-center gap-2 transition-colors w-full md:w-auto justify-center">
-                        <i class="fas fa-file-pdf"></i> Generate Marksheet PDF
-                    </button>
+        <div id="pdf-wrapper" style="display: none; position: absolute; left: -9999px;">
+            <div id="print-template" style="width: 800px; padding: 40px; background: white; color: black; font-family: Arial, sans-serif;">
+                <div style="text-align: center; border-bottom: 3px solid #1e3a8a; padding-bottom: 20px; margin-bottom: 30px;">
+                    <h1 style="font-size: 32px; font-weight: 800; color: #1e3a8a; margin: 0; text-transform: uppercase;" id="pdf-col">ABC COLLEGE</h1>
+                    <p style="font-size: 14px; color: #475569; font-weight: 600; margin-top: 5px;">Official Academic Transcript - Powered by P for Problem</p>
                 </div>
-
-                <div class="glass-card p-8 rounded-xl flex flex-col items-center justify-center border-dashed border-2 border-slate-600 h-64">
-                    <i class="fas fa-cloud-download-alt text-4xl text-gray-500 mb-4"></i>
-                    <p class="text-gray-400 text-center">Click the button above to generate a professional A4 Marksheet PDF format directly from Firebox Data.</p>
-                </div>
-            </div>
-
-        </main>
-    </div>
-
-    <div id="pdf-container" style="display: none;">
-        <div id="pdf-template">
-            <div style="text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 20px; margin-bottom: 30px;">
-                <h1 style="font-size: 28px; font-weight: bold; color: #0f172a; margin: 0;">INSTITUTE OF TECHNOLOGY</h1>
-                <p style="color: #475569; font-size: 14px; margin-top: 5px;">Official Academic Record - Generated via Team P for Problem</p>
-            </div>
-            
-            <table style="width: 100%; margin-bottom: 30px; font-size: 14px;">
-                <tr>
-                    <td><strong>Student Name:</strong> Rishabh</td>
-                    <td style="text-align: right;"><strong>Roll No:</strong> CSE-201</td>
-                </tr>
-                <tr>
-                    <td><strong>Course:</strong> B.Tech Computer Science</td>
-                    <td style="text-align: right;"><strong>Year:</strong> 2nd Year</td>
-                </tr>
-            </table>
-
-            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 14px;">
-                <thead>
-                    <tr style="background-color: #f1f5f9;">
-                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left;">Subject Code</th>
-                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left;">Subject Name</th>
-                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">Total Marks</th>
-                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">Obtained</th>
-                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">Grade</th>
-                    </tr>
-                </thead>
-                <tbody>
+                <table style="width: 100%; margin-bottom: 30px; font-size: 15px; border-collapse: separate; border-spacing: 0 8px;">
                     <tr>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px;">CS201</td>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px;">Mathematics II</td>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">100</td>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">85</td>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center; font-weight: bold;">A</td>
+                        <td><strong>Student Name:</strong> <span id="pdf-name">Rishabh Kumar</span></td>
+                        <td style="text-align: right;"><strong>Roll No:</strong> <span id="pdf-roll">101</span></td>
                     </tr>
                     <tr>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px;">CS202</td>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px;">Data Structures</td>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">100</td>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">92</td>
-                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center; font-weight: bold;">A+</td>
+                        <td><strong>Father's Name:</strong> <span id="pdf-fname-val">Rajesh Kumar</span></td>
+                        <td style="text-align: right;"><strong>Course & Sec:</strong> <span id="pdf-sec-val">BCA (Sec A)</span></td>
                     </tr>
-                </tbody>
-            </table>
-
-            <div style="display: flex; justify-content: space-between; margin-top: 80px;">
-                <div style="text-align: center;">
-                    <div style="border-top: 1px solid black; width: 150px; padding-top: 5px;">Date of Issue</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="border-top: 1px solid black; width: 150px; padding-top: 5px;">HOD Signature</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // --- 1. Login & Logout Logic ---
-        function processLogin(e) {
-            e.preventDefault();
-            const btn = document.getElementById('login-btn');
-            const originalText = btn.innerHTML;
-            
-            // Loading state
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Authenticating...';
-            btn.classList.add('opacity-80', 'cursor-not-allowed');
-
-            setTimeout(() => {
-                // Hide Login, Show Main App
-                const loginGate = document.getElementById('login-gate');
-                loginGate.classList.add('fade-out');
-                
-                setTimeout(() => {
-                    loginGate.style.display = 'none';
-                    document.getElementById('main-app').classList.remove('hidden-section');
-                    renderChart(); // Initialize graph ONLY after login
-                }, 400);
-
-            }, 1000);
-        }
-
-        function processLogout() {
-            // Reset Form and UI
-            document.getElementById('auth-form').reset();
-            const btn = document.getElementById('login-btn');
-            btn.innerHTML = '<span>Access Portal</span> <i class="fas fa-arrow-right"></i>';
-            btn.classList.remove('opacity-80', 'cursor-not-allowed');
-
-            // Hide App, Show Login
-            document.getElementById('main-app').classList.add('hidden-section');
-            const loginGate = document.getElementById('login-gate');
-            loginGate.style.display = 'flex';
-            loginGate.classList.remove('fade-out');
-            loginGate.classList.add('fade-in');
-            
-            // Default back to dashboard tab silently
-            switchTab('dashboard');
-        }
-
-        // --- 2. Tab Navigation Logic (SPA Behavior) ---
-        function switchTab(tabId) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.add('hidden-section');
-                tab.classList.remove('fade-in');
-            });
-            
-            // Reset all nav buttons styling
-            document.querySelectorAll('.nav-item').forEach(nav => {
-                nav.classList.remove('active-nav');
-                nav.classList.add('text-gray-400');
-            });
-
-            // Show selected tab
-            const activeTab = document.getElementById(`tab-${tabId}`);
-            activeTab.classList.remove('hidden-section');
-            
-            // Trigger reflow for animation
-            void activeTab.offsetWidth; 
-            activeTab.classList.add('fade-in');
-
-            // Highlight active nav button
-            const activeNav = document.getElementById(`nav-${tabId}`);
-            activeNav.classList.add('active-nav');
-            activeNav.classList.remove('text-gray-400');
-        }
-
-        // --- 3. Chart.js Implementation ---
-        let attChart = null;
-        function renderChart() {
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            
-            // Destroy previous instance if exists (prevents overlap bug)
-            if(attChart) attChart.destroy();
-
-            // Gradient for chart fill
-            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
-            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)'); // brandBlue with opacity
-            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
-
-            attChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-                    datasets: [{
-                        label: 'Present Students',
-                        data: [1150, 1200, 1180, 1220, 1190, 1240],
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 6,
-                        borderSkipped: false,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            max: 1300,
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#94a3b8' }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#94a3b8' }
-                        }
-                    }
-                }
-            });
-        }
-
-        // --- 4. Professional PDF Generation ---
-        function downloadDocument() {
-            // Briefly show the hidden template to capture it, then hide it again
-            const pdfContainer = document.getElementById('pdf-container');
-            const element = document.getElementById('pdf-template');
-            
-            pdfContainer.style.display = 'block';
-            element.style.display = 'block';
-
-            const opt = {
-                margin:       0.5,
-                filename:     'Rishabh_Official_Marksheet.pdf',
-                image:        { type: 'jpeg', quality: 1 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
-
-            // Generate and save
-            html2pdf().set(opt).from(element).save().then(() => {
-                // Hide it back after generating
-                pdfContainer.style.display = 'none';
-                element.style.display = 'none';
-            });
-        }
-    </script>
-</body>
-</html>
+                    <tr>
+                        <td><strong>Email ID:</strong> <span id="pdf-mail-val">rishabh@gmail.com</span></td>
+                        <td style="text-align: right;"><strong>Status:</strong> <span style="color: green; font-weight: bold;">REGULAR</span></td>
+                    </tr>
+                </table>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px;">
+                    <thead>
+                        <tr style="background-color: #f1f5f9;">
+                            <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: left;">Subject</th>
+                            <th style="border: 1px solid #cbd5e1; padding: 12px; text-align: center;">Max Ma
