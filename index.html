@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EduVerse - Smart Student Portal</title>
+    <title>EduVerse - P for Problem Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getDatabase, ref, set, get, push, remove, update, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-        
+
         const firebaseConfig = {
             apiKey: "AIzaSyAnajb7aYGO0KWKSWT5SJZnpT0-lPoESnw",
             authDomain: "student-management-37282.firebaseapp.com",
@@ -24,97 +27,243 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Making Firebase global for easier access in simple scripts
-        window.db = db; window.dbRef = ref; window.dbSet = set;
-        window.dbGet = get; window.dbPush = push; window.dbRemove = remove;
-        window.dbUpdate = update; window.onValue = onValue;
+        // Exporting to Global for local functions
+        window.db = db; window.dbRef = ref; window.dbSet = set; window.dbGet = get;
+        window.dbUpdate = update; window.onValue = onValue; window.dbPush = push;
     </script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-        * { font-family: 'Poppins', sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+        * { font-family: 'Poppins', sans-serif; transition: all 0.2s ease-in-out; }
         .bg-gradient { background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 50%, #db2777 100%); background-attachment: fixed; }
-        .floating { animation: floating 3s ease-in-out infinite; }
-        @keyframes floating { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-15px); } }
-        .btn-hover { transition: all 0.3s ease; }
-        .btn-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
-        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); }
+        .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .floating { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-block; cursor: pointer; border: 1px solid rgba(255,255,255,0.3); }
+        .dot-present { background-color: #22c55e; } .dot-absent { background-color: #ef4444; } .dot-none { background-color: #e5e7eb; }
     </style>
 </head>
-<body class="bg-gradient min-h-screen">
+<body class="bg-gradient min-h-screen text-white">
+
     <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-md w-full glass rounded-2xl shadow-2xl p-8">
-            <div class="text-center mb-6">
-                <i data-lucide="graduation-cap" class="w-16 h-16 text-blue-400 mx-auto mb-4"></i>
-                <h1 class="text-4xl font-bold text-white mb-2">EduVerse</h1>
-                <p class="text-blue-200">Smart Student Management</p>
+        <div class="max-w-md w-full glass rounded-3xl p-8 shadow-2xl">
+            <div class="text-center mb-8">
+                <div class="bg-white/20 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-4 floating">
+                    <i data-lucide="bot" class="w-12 h-12 text-blue-400"></i>
+                </div>
+                <h1 class="text-4xl font-bold">EduVerse</h1>
+                <p class="text-blue-200 mt-2" id="userLiveCounter">Connecting to DB...</p>
             </div>
             <div class="space-y-4">
-                <select id="role" class="w-full bg-white/20 text-white border border-white/30 p-3 rounded-lg outline-none">
-                    <option value="admin" class="text-gray-800">👨‍💼 Admin</option>
-                    <option value="student" class="text-gray-800">🎓 Student</option>
+                <select id="loginRole" class="w-full bg-white/10 p-3 rounded-xl border border-white/20 outline-none">
+                    <option value="admin" class="text-black">Admin</option>
+                    <option value="student" class="text-black">Student</option>
+                    <option value="parent" class="text-black">Parent</option>
                 </select>
-                <input id="username" type="text" placeholder="Username" class="w-full bg-white/20 text-white p-3 rounded-lg border border-white/30 outline-none">
-                <input id="password" type="password" placeholder="Password" class="w-full bg-white/20 text-white p-3 rounded-lg border border-white/30 outline-none">
-                <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 rounded-lg font-semibold btn-hover">Login</button>
+                <input id="userIn" type="text" placeholder="Username" class="w-full bg-white/10 p-3 rounded-xl border border-white/20">
+                <input id="passIn" type="password" placeholder="Password" class="w-full bg-white/10 p-3 rounded-xl border border-white/20">
+                <button onclick="handleAuth()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-bold shadow-lg">Enter Portal 🚀</button>
             </div>
         </div>
     </div>
 
-    <div id="dashboard" class="hidden min-h-screen p-4">
+    <div id="dashboard" class="hidden p-4 md:p-8">
         <div class="max-w-7xl mx-auto">
-            <nav class="glass rounded-2xl p-4 mb-6 flex justify-between items-center text-white">
-                <h1 class="text-2xl font-bold flex items-center gap-2"><i data-lucide="graduation-cap"></i> EduVerse</h1>
-                <button onclick="location.reload()" class="bg-red-500/80 px-4 py-2 rounded-lg btn-hover">Logout</button>
+            <nav class="glass rounded-2xl p-4 mb-8 flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="layout-dashboard" class="text-blue-400"></i>
+                    <h2 class="text-xl font-bold">EduVerse <span id="roleBadge" class="text-xs bg-blue-500 px-2 py-1 rounded-full ml-2"></span></h2>
+                </div>
+                <button onclick="location.reload()" class="bg-red-500/20 hover:bg-red-500 text-xs px-4 py-2 rounded-lg">Logout</button>
             </nav>
 
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div class="glass p-4 rounded-xl text-white">
-                    <p class="text-sm opacity-80">Total Students</p>
-                    <p class="text-2xl font-bold" id="totalCount">0</p>
-                </div>
-                </div>
+            <div id="announcementBox" class="bg-yellow-500/20 border border-yellow-500/30 p-4 rounded-xl mb-8 hidden flex items-center gap-3">
+                <i data-lucide="megaphone" class="text-yellow-400"></i>
+                <marquee id="msgText" class="font-medium"></marquee>
+            </div>
 
-            <div class="glass p-6 rounded-2xl">
-                <h2 class="text-xl font-semibold text-white mb-4">Student Records</h2>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="glass p-6 rounded-2xl text-center">
+                    <p class="text-blue-200 text-sm">Total Students</p>
+                    <h3 class="text-3xl font-bold" id="statTotal">0</h3>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <p class="text-green-200 text-sm">Present Today</p>
+                    <h3 class="text-3xl font-bold" id="statPresent">0</h3>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <p class="text-purple-200 text-sm">Avg CGPA</p>
+                    <h3 class="text-3xl font-bold" id="statCGPA">0.0</h3>
+                </div>
+                <div class="glass p-6 rounded-2xl text-center">
+                    <p class="text-yellow-200 text-sm">Top Scorer</p>
+                    <h3 class="text-3xl font-bold text-lg" id="statTop">-</h3>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                <div class="lg:col-span-2 glass p-6 rounded-3xl">
+                    <h3 class="mb-4 font-bold flex items-center gap-2"><i data-lucide="bar-chart"></i> Attendance Trend</h3>
+                    <canvas id="attChart" height="150"></canvas>
+                </div>
+                <div class="glass p-6 rounded-3xl">
+                    <h3 class="mb-4 font-bold flex items-center gap-2"><i data-lucide="trophy"></i> Leaderboard</h3>
+                    <div id="leaderList" class="space-y-4"></div>
+                </div>
+            </div>
+
+            <div class="glass p-6 rounded-3xl overflow-hidden">
+                <div class="flex flex-col md:flex-row justify-between mb-6 gap-4">
+                    <input id="search" onkeyup="renderTable()" type="text" placeholder="Search roll or name..." class="bg-white/10 p-2 rounded-lg border border-white/20 w-full md:w-64">
+                    <div class="flex gap-2">
+                        <button id="adminOnlyBtn" onclick="toggleAddModal()" class="bg-blue-600 px-4 py-2 rounded-lg text-sm hidden">+ Add Student</button>
+                        <button onclick="exportPDF()" class="bg-white/10 px-4 py-2 rounded-lg text-sm">Download PDF</button>
+                    </div>
+                </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-white">
-                        <thead class="bg-white/10">
+                    <table class="w-full text-left">
+                        <thead class="bg-white/5 text-blue-200 uppercase text-xs">
                             <tr>
-                                <th class="p-3 text-left">Name</th>
-                                <th class="p-3 text-left">Roll No</th>
-                                <th class="p-3 text-left">CGPA</th>
+                                <th class="p-4">Student Info</th>
+                                <th class="p-4">Section</th>
+                                <th class="p-4">CGPA</th>
+                                <th class="p-4">Weekly Attendance (M-S)</th>
+                                <th id="actionCol" class="p-4 hidden">Action</th>
                             </tr>
                         </thead>
-                        <tbody id="studentTable">
-                            </tbody>
+                        <tbody id="studentTableBody"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
+    <div id="toast" class="fixed bottom-10 right-10 bg-green-600 p-4 rounded-xl shadow-2xl hidden z-50"></div>
+
     <script>
+        let currentRole = '';
+        let allStudents = [];
+        let chartInstance = null;
+
+        // Initialize Lucide
         lucide.createIcons();
 
-        function handleLogin() {
-            const user = document.getElementById('username').value;
-            const pass = document.getElementById('password').value;
-            
-            if(user === 'admin' && pass === 'admin123') {
+        // 1. Live User Counter
+        function syncMeta() {
+            onValue(dbRef(db, 'students'), (snap) => {
+                const data = snap.val();
+                const count = data ? Object.keys(data).length : 0;
+                document.getElementById('userLiveCounter').innerText = `${count} Users Active`;
+                allStudents = data ? Object.values(data) : [];
+                if(currentRole) updateDashboard();
+            });
+        }
+        setTimeout(syncMeta, 1000);
+
+        // 2. Authentication Logic
+        function handleAuth() {
+            const user = document.getElementById('userIn').value;
+            const pass = document.getElementById('passIn').value;
+            const role = document.getElementById('loginRole').value;
+
+            // Simple demo logic as per roadmap
+            if((role === 'admin' && user === 'admin' && pass === 'admin123') || (user === 'guest')) {
+                currentRole = role;
                 document.getElementById('loginScreen').classList.add('hidden');
                 document.getElementById('dashboard').classList.remove('hidden');
-                loadData();
+                document.getElementById('roleBadge').innerText = role.toUpperCase();
+                if(role === 'admin') {
+                    document.getElementById('adminOnlyBtn').classList.remove('hidden');
+                    document.getElementById('actionCol').classList.remove('hidden');
+                }
+                updateDashboard();
             } else {
-                alert('Invalid Credentials!');
+                alert("Galat password hai bhai!");
             }
         }
 
-        function loadData() {
-            // Simplified Firebase fetch logic
-            console.log("Fetching student data...");
+        // 3. Update Dashboard Stats & Charts
+        function updateDashboard() {
+            document.getElementById('statTotal').innerText = allStudents.length;
+            
+            // Calc Top Scorer
+            if(allStudents.length > 0) {
+                const top = [...allStudents].sort((a,b) => b.cgpa - a.cgpa)[0];
+                document.getElementById('statTop').innerText = top.name;
+                document.getElementById('statCGPA').innerText = (allStudents.reduce((acc, s) => acc + parseFloat(s.cgpa), 0) / allStudents.length).toFixed(2);
+                
+                // Render Leaderboard
+                const leaders = [...allStudents].sort((a,b) => b.cgpa - a.cgpa).slice(0,3);
+                document.getElementById('leaderList').innerHTML = leaders.map((s, i) => `
+                    <div class="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10">
+                        <span class="flex items-center gap-2"><b>#${i+1}</b> ${s.name}</span>
+                        <span class="text-yellow-400 font-bold">${s.cgpa}</span>
+                    </div>
+                `).join('');
+            }
+            renderTable();
+            initChart();
         }
+
+        // 4. Render Student Table & Attendance Dots
+        function renderTable() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+
+            allStudents.filter(s => s.name.toLowerCase().includes(query) || s.roll.includes(query)).forEach(s => {
+                const row = document.createElement('tr');
+                row.className = "border-b border-white/5 hover:bg-white/5";
+                row.innerHTML = `
+                    <td class="p-4">
+                        <div class="font-bold">${s.name}</div>
+                        <div class="text-xs text-blue-300">${s.roll}</div>
+                    </td>
+                    <td class="p-4">${s.section || 'A'}</td>
+                    <td class="p-4"><span class="bg-blue-500/20 px-2 py-1 rounded text-sm">${s.cgpa}</span></td>
+                    <td class="p-4">
+                        <div class="flex gap-2">
+                            ${[1,2,3,4,5,6,7].map(day => `<span onclick="cycleAttendance('${s.roll}', ${day})" class="dot dot-none"></span>`).join('')}
+                        </div>
+                    </td>
+                    ${currentRole === 'admin' ? `<td class="p-4"><button class="text-red-400 text-xs">Delete</button></td>` : ''}
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 5. Chart.js Initialization
+        function initChart() {
+            const ctx = document.getElementById('attChart').getContext('2d');
+            if(chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Attendance %',
+                        data: [65, 78, 40, 85, 92, 30, 20],
+                        borderColor: '#7c3aed',
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: 'rgba(124, 58, 237, 0.1)'
+                    }]
+                },
+                options: { plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#fff' } } } }
+            });
+        }
+
+        // 6. PDF Export
+        window.exportPDF = function() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("EduVerse Student Report", 10, 10);
+            doc.autoTable({ html: '#studentTableBody' });
+            doc.save('Student_Data.pdf');
+        }
+
+        window.handleAuth = handleAuth;
+        window.renderTable = renderTable;
     </script>
 </body>
 </html>
-
