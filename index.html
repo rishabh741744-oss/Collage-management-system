@@ -1,314 +1,433 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P for Problem - Professional SMS</title>
+    <title>P for Problem | Firebox System</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .hidden-view { display: none !important; }
-        .active-tab { background-color: #e5e7eb; border-left: 4px solid #2563eb; color: #1d4ed8; font-weight: bold; }
-        
-        /* Marksheet specific styling for PDF */
-        #pdf-document {
-            background: white; padding: 40px; border: 2px solid #1e3a8a;
-            border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0f172a',
+                        cardBg: '#1e293b',
+                        brandBlue: '#3b82f6'
+                    }
+                }
+            }
         }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #0f172a; color: #f8fafc; overflow-x: hidden; }
+        
+        /* Smooth Fade Transitions */
+        .fade-in { animation: fadeIn 0.4s ease-in forwards; }
+        .fade-out { animation: fadeOut 0.4s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeOut { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(-10px); } }
+        
+        .active-nav { background-color: #3b82f6; color: white; border-radius: 0.5rem; }
+        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        
+        /* Hidden class for SPA logic */
+        .hidden-section { display: none !important; }
+
+        /* PDF Styling - Hidden from UI, only used for download */
+        #pdf-template { background: white; color: black; padding: 40px; width: 800px; display: none; }
     </style>
 </head>
-<body class="text-gray-800 antialiased h-screen flex overflow-hidden">
+<body class="h-screen w-screen overflow-hidden flex bg-darkBg text-white">
 
-    <div id="login-page" class="w-full h-full flex items-center justify-center bg-gray-900 absolute z-50 transition-opacity duration-500">
-        <div class="bg-white p-10 rounded-xl shadow-2xl w-96 transform transition-all">
-            <div class="text-center mb-8">
-                <h2 class="text-3xl font-bold text-gray-800">Team P for Problem</h2>
-                <p class="text-sm text-gray-500 mt-2">Secure Student Management</p>
-            </div>
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="mb-4">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Admin ID</label>
-                    <input type="text" id="userid" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="Enter ID">
+    <div id="login-gate" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-darkBg px-4">
+        <div class="mb-8 text-center">
+            <h1 class="text-4xl font-bold tracking-tight text-brandBlue mb-2">P for Problem</h1>
+            <p class="text-gray-400">Powered by Firebox Storage</p>
+        </div>
+        
+        <div class="glass-card p-8 rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-600"></div>
+            <h2 class="text-2xl font-semibold mb-6 text-white text-center">Secure Login</h2>
+            
+            <form id="auth-form" onsubmit="processLogin(event)">
+                <div class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Admin ID / Student Roll No</label>
+                        <div class="relative">
+                            <i class="fas fa-user absolute left-3 top-3.5 text-gray-500"></i>
+                            <input type="text" required class="w-full bg-slate-800 border border-slate-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-brandBlue focus:ring-1 focus:ring-brandBlue transition" placeholder="Enter ID">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-1">Password</label>
+                        <div class="relative">
+                            <i class="fas fa-lock absolute left-3 top-3.5 text-gray-500"></i>
+                            <input type="password" required class="w-full bg-slate-800 border border-slate-700 rounded-lg py-3 pl-10 pr-4 text-white focus:outline-none focus:border-brandBlue focus:ring-1 focus:ring-brandBlue transition" placeholder="••••••••">
+                        </div>
+                    </div>
+                    <button type="submit" id="login-btn" class="w-full bg-brandBlue hover:bg-blue-600 text-white font-semibold py-3 rounded-lg shadow-lg shadow-blue-500/30 transition-all duration-200 mt-4 flex justify-center items-center gap-2">
+                        <span>Access Portal</span> <i class="fas fa-arrow-right"></i>
+                    </button>
                 </div>
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                    <input type="password" id="password" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600" placeholder="••••••••">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-300">
-                    Secure Login
-                </button>
             </form>
         </div>
     </div>
 
-    <div id="main-app" class="hidden-view w-full h-full flex">
+    <div id="main-app" class="hidden-section w-full h-full flex flex-col md:flex-row">
         
-        <aside class="w-64 bg-white shadow-xl flex flex-col justify-between h-full relative z-10">
+        <nav class="w-full md:w-64 bg-cardBg border-b md:border-b-0 md:border-r border-slate-700 flex flex-col justify-between z-10 shrink-0">
             <div>
-                <div class="p-6 border-b">
-                    <h1 class="text-2xl font-bold text-blue-700 flex items-center gap-2">
-                        <i class="fas fa-university"></i> Portal View
-                    </h1>
+                <div class="p-6 hidden md:block">
+                    <h2 class="text-xl font-bold text-brandBlue">P for Problem</h2>
+                    <p class="text-xs text-gray-400 mt-1">v2.0 Professional</p>
                 </div>
-                <nav class="mt-6 flex flex-col gap-2 px-4">
-                    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-btn active-tab flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg transition">
-                        <i class="fas fa-chart-line"></i> Dashboard
+                <div class="flex md:flex-col p-2 md:p-4 gap-1 overflow-x-auto md:overflow-visible">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item active-nav flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all whitespace-nowrap">
+                        <i class="fas fa-chart-pie"></i> <span class="hidden md:inline">Dashboard</span>
                     </button>
-                    <button onclick="switchTab('attendance')" id="tab-attendance" class="nav-btn flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition">
-                        <i class="fas fa-user-check"></i> Present / Absent
+                    <button onclick="switchTab('attendance')" id="nav-attendance" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white transition-all whitespace-nowrap rounded-lg">
+                        <i class="fas fa-users"></i> <span class="hidden md:inline">Attendance</span>
                     </button>
-                    <button onclick="switchTab('download')" id="tab-download" class="nav-btn flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg hover:bg-gray-100 transition">
-                        <i class="fas fa-file-pdf"></i> Download Data
+                    <button onclick="switchTab('reports')" id="nav-reports" class="nav-item flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-400 hover:text-white transition-all whitespace-nowrap rounded-lg">
+                        <i class="fas fa-file-export"></i> <span class="hidden md:inline">Reports & Downloads</span>
                     </button>
-                </nav>
+                </div>
             </div>
-            <div class="p-4 border-t">
-                <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 hover:bg-red-100 py-2 rounded-lg font-semibold transition">
+            
+            <div class="p-4 hidden md:block border-t border-slate-700">
+                <button onclick="processLogout()" class="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors">
                     <i class="fas fa-sign-out-alt"></i> Secure Logout
                 </button>
             </div>
-        </aside>
+        </nav>
 
-        <main class="flex-1 bg-gray-50 h-full overflow-y-auto p-8">
+        <main class="flex-1 bg-darkBg overflow-y-auto p-4 md:p-8 relative">
             
-            <div id="view-dashboard" class="page-view animate-fade-in">
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">System Analytics</h2>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-500">
-                        <p class="text-gray-500 text-sm font-semibold">Total Students</p>
-                        <p class="text-3xl font-bold">1,248</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-green-500">
-                        <p class="text-gray-500 text-sm font-semibold">Average Attendance</p>
-                        <p class="text-3xl font-bold">87.5%</p>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-500">
-                        <p class="text-gray-500 text-sm font-semibold">Firebox Sync Status</p>
-                        <p class="text-xl font-bold text-green-600"><i class="fas fa-check-circle"></i> Connected</p>
-                    </div>
-                </div>
+            <div class="md:hidden flex justify-between items-center mb-6">
+                <h2 class="text-lg font-bold text-brandBlue">P for Problem</h2>
+                <button onclick="processLogout()" class="text-red-400 text-sm"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+
+            <div id="tab-dashboard" class="tab-content fade-in">
+                <h3 class="text-2xl font-bold mb-6">System Overview</h3>
                 
-                <div class="bg-white p-6 rounded-xl shadow-sm w-full md:w-2/3">
-                    <h3 class="text-lg font-semibold mb-4">Performance Graph</h3>
-                    <canvas id="performanceChart" height="100"></canvas>
-                </div>
-            </div>
-
-            <div id="view-attendance" class="page-view hidden-view">
-                <h2 class="text-3xl font-bold mb-6 text-gray-800">Daily Attendance Tracker</h2>
-                <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-600 text-sm">
-                                <th class="p-4 border-b">Roll No</th>
-                                <th class="p-4 border-b">Student Name</th>
-                                <th class="p-4 border-b">Status</th>
-                                <th class="p-4 border-b">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4">CSE-201</td>
-                                <td class="p-4 font-semibold">Rishabh Sharma</td>
-                                <td class="p-4"><span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">Present</span></td>
-                                <td class="p-4">
-                                    <button class="text-blue-500 hover:text-blue-700 mr-2"><i class="fas fa-edit"></i> Edit</button>
-                                </td>
-                            </tr>
-                            <tr class="border-b hover:bg-gray-50">
-                                <td class="p-4">CSE-202</td>
-                                <td class="p-4 font-semibold">Aprajita Singh</td>
-                                <td class="p-4"><span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs font-bold">Present</span></td>
-                                <td class="p-4"><button class="text-blue-500 hover:text-blue-700 mr-2"><i class="fas fa-edit"></i> Edit</button></td>
-                            </tr>
-                            <tr class="hover:bg-gray-50">
-                                <td class="p-4">CSE-203</td>
-                                <td class="p-4 font-semibold">Arnav Kumar</td>
-                                <td class="p-4"><span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-xs font-bold">Absent</span></td>
-                                <td class="p-4"><button class="text-blue-500 hover:text-blue-700 mr-2"><i class="fas fa-edit"></i> Edit</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <div id="view-download" class="page-view hidden-view">
-                <div class="flex justify-between items-end mb-6">
-                    <div>
-                        <h2 class="text-3xl font-bold text-gray-800">Generate Official Reports</h2>
-                        <p class="text-gray-500 mt-1">Download student data as a well-defined professional PDF.</p>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="glass-card p-5 rounded-xl border-t-2 border-t-blue-500">
+                        <p class="text-gray-400 text-sm mb-1">Total Students</p>
+                        <h4 class="text-2xl md:text-3xl font-bold">1,250</h4>
                     </div>
-                    <button onclick="downloadPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg flex items-center gap-2 transition">
-                        <i class="fas fa-download"></i> Download as PDF
-                    </button>
+                    <div class="glass-card p-5 rounded-xl border-t-2 border-t-emerald-500">
+                        <p class="text-gray-400 text-sm mb-1">Avg Attendance</p>
+                        <h4 class="text-2xl md:text-3xl font-bold">88%</h4>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl border-t-2 border-t-purple-500">
+                        <p class="text-gray-400 text-sm mb-1">Active Courses</p>
+                        <h4 class="text-2xl md:text-3xl font-bold">48</h4>
+                    </div>
+                    <div class="glass-card p-5 rounded-xl border-t-2 border-t-orange-500">
+                        <p class="text-gray-400 text-sm mb-1">Firebox Sync</p>
+                        <h4 class="text-lg font-bold text-emerald-400 mt-2"><i class="fas fa-cloud-check"></i> Optimized</h4>
+                    </div>
                 </div>
 
-                <div class="w-full overflow-x-auto">
-                    <div id="pdf-document" class="w-[800px] mx-auto">
-                        <div class="text-center border-b-2 border-gray-800 pb-4 mb-6">
-                            <h1 class="text-3xl font-bold uppercase tracking-wider text-blue-900">Institute of Technology</h1>
-                            <p class="text-gray-600 font-semibold">Official Student Academic Record</p>
-                            <p class="text-sm text-gray-500 mt-1">Generated via Team P for Problem Portal</p>
-                        </div>
-                        
-                        <div class="flex justify-between mb-8">
-                            <div>
-                                <p><strong>Student Name:</strong> Rishabh</p>
-                                <p><strong>Course:</strong> B.Tech Computer Science</p>
-                            </div>
-                            <div class="text-right">
-                                <p><strong>Roll No:</strong> CSE-201</p>
-                                <p><strong>Year:</strong> 2nd Year</p>
-                            </div>
-                        </div>
+                <div class="glass-card p-4 md:p-6 rounded-xl w-full">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold">Attendance Analytics</h3>
+                        <select class="bg-slate-800 border border-slate-700 text-sm rounded px-2 py-1 outline-none">
+                            <option>This Week</option>
+                            <option>This Month</option>
+                        </select>
+                    </div>
+                    <div class="w-full h-64 md:h-80">
+                        <canvas id="mainChart"></canvas>
+                    </div>
+                </div>
+            </div>
 
-                        <table class="w-full text-left border-collapse border border-gray-300">
-                            <thead>
-                                <tr class="bg-gray-100">
-                                    <th class="p-3 border border-gray-300">Subject</th>
-                                    <th class="p-3 border border-gray-300">Total Marks</th>
-                                    <th class="p-3 border border-gray-300">Marks Obtained</th>
-                                    <th class="p-3 border border-gray-300">Grade</th>
+            <div id="tab-attendance" class="tab-content hidden-section fade-in">
+                <h3 class="text-2xl font-bold mb-6">Manage Attendance</h3>
+                
+                <div class="glass-card rounded-xl overflow-hidden">
+                    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800/50">
+                        <input type="text" placeholder="Search student..." class="bg-slate-900 border border-slate-700 rounded px-3 py-1.5 text-sm focus:outline-none focus:border-brandBlue w-full md:w-64">
+                    </div>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left whitespace-nowrap">
+                            <thead class="bg-slate-800/80 text-gray-400 text-sm uppercase tracking-wider">
+                                <tr>
+                                    <th class="px-6 py-4 font-medium">Roll No</th>
+                                    <th class="px-6 py-4 font-medium">Name</th>
+                                    <th class="px-6 py-4 font-medium">Course</th>
+                                    <th class="px-6 py-4 font-medium">Status</th>
+                                    <th class="px-6 py-4 font-medium">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="p-3 border border-gray-300">Mathematics II</td>
-                                    <td class="p-3 border border-gray-300">100</td>
-                                    <td class="p-3 border border-gray-300">85</td>
-                                    <td class="p-3 border border-gray-300 font-bold text-green-600">A</td>
+                            <tbody class="divide-y divide-slate-700/50">
+                                <tr class="hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-4 text-sm">CSE-201</td>
+                                    <td class="px-6 py-4 font-medium flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold">R</div>
+                                        Rishabh
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-400 text-sm">B.Tech CSE</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Present</span>
+                                    </td>
+                                    <td class="px-6 py-4"><button class="text-brandBlue hover:text-blue-400 text-sm font-medium">Edit</button></td>
                                 </tr>
-                                <tr>
-                                    <td class="p-3 border border-gray-300">Data Structures</td>
-                                    <td class="p-3 border border-gray-300">100</td>
-                                    <td class="p-3 border border-gray-300">92</td>
-                                    <td class="p-3 border border-gray-300 font-bold text-green-600">A+</td>
+                                <tr class="hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-4 text-sm">CSE-202</td>
+                                    <td class="px-6 py-4 font-medium flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold">A</div>
+                                        Aprajita
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-400 text-sm">B.Tech CSE</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Present</span>
+                                    </td>
+                                    <td class="px-6 py-4"><button class="text-brandBlue hover:text-blue-400 text-sm font-medium">Edit</button></td>
                                 </tr>
-                                <tr>
-                                    <td class="p-3 border border-gray-300">C Programming</td>
-                                    <td class="p-3 border border-gray-300">100</td>
-                                    <td class="p-3 border border-gray-300">78</td>
-                                    <td class="p-3 border border-gray-300 font-bold text-blue-600">B+</td>
+                                <tr class="hover:bg-slate-800/30 transition-colors">
+                                    <td class="px-6 py-4 text-sm">CSE-203</td>
+                                    <td class="px-6 py-4 font-medium flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center font-bold">A</div>
+                                        Arnav
+                                    </td>
+                                    <td class="px-6 py-4 text-gray-400 text-sm">B.Tech CSE</td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">Absent</span>
+                                    </td>
+                                    <td class="px-6 py-4"><button class="text-brandBlue hover:text-blue-400 text-sm font-medium">Edit</button></td>
                                 </tr>
                             </tbody>
                         </table>
-
-                        <div class="mt-12 flex justify-between items-end">
-                            <div class="text-center">
-                                <div class="w-32 border-b border-gray-800 mb-2"></div>
-                                <p class="text-sm font-semibold">Date of Issue</p>
-                            </div>
-                            <div class="text-center">
-                                <div class="w-32 border-b border-gray-800 mb-2"></div>
-                                <p class="text-sm font-semibold">Controller of Examinations</p>
-                            </div>
-                        </div>
                     </div>
+                </div>
+            </div>
+
+            <div id="tab-reports" class="tab-content hidden-section fade-in">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 gap-4">
+                    <div>
+                        <h3 class="text-2xl font-bold">Generate Official Reports</h3>
+                        <p class="text-gray-400 text-sm mt-1">Download strictly formatted academic documents.</p>
+                    </div>
+                    <button onclick="downloadDocument()" class="bg-brandBlue hover:bg-blue-600 text-white font-medium py-2.5 px-6 rounded-lg shadow-lg flex items-center gap-2 transition-colors w-full md:w-auto justify-center">
+                        <i class="fas fa-file-pdf"></i> Generate Marksheet PDF
+                    </button>
+                </div>
+
+                <div class="glass-card p-8 rounded-xl flex flex-col items-center justify-center border-dashed border-2 border-slate-600 h-64">
+                    <i class="fas fa-cloud-download-alt text-4xl text-gray-500 mb-4"></i>
+                    <p class="text-gray-400 text-center">Click the button above to generate a professional A4 Marksheet PDF format directly from Firebox Data.</p>
                 </div>
             </div>
 
         </main>
     </div>
 
+    <div id="pdf-container" style="display: none;">
+        <div id="pdf-template">
+            <div style="text-align: center; border-bottom: 2px solid #1e293b; padding-bottom: 20px; margin-bottom: 30px;">
+                <h1 style="font-size: 28px; font-weight: bold; color: #0f172a; margin: 0;">INSTITUTE OF TECHNOLOGY</h1>
+                <p style="color: #475569; font-size: 14px; margin-top: 5px;">Official Academic Record - Generated via Team P for Problem</p>
+            </div>
+            
+            <table style="width: 100%; margin-bottom: 30px; font-size: 14px;">
+                <tr>
+                    <td><strong>Student Name:</strong> Rishabh</td>
+                    <td style="text-align: right;"><strong>Roll No:</strong> CSE-201</td>
+                </tr>
+                <tr>
+                    <td><strong>Course:</strong> B.Tech Computer Science</td>
+                    <td style="text-align: right;"><strong>Year:</strong> 2nd Year</td>
+                </tr>
+            </table>
+
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 14px;">
+                <thead>
+                    <tr style="background-color: #f1f5f9;">
+                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left;">Subject Code</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: left;">Subject Name</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">Total Marks</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">Obtained</th>
+                        <th style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px;">CS201</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px;">Mathematics II</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">100</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">85</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center; font-weight: bold;">A</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px;">CS202</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px;">Data Structures</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">100</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center;">92</td>
+                        <td style="border: 1px solid #cbd5e1; padding: 10px; text-align: center; font-weight: bold;">A+</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div style="display: flex; justify-content: space-between; margin-top: 80px;">
+                <div style="text-align: center;">
+                    <div style="border-top: 1px solid black; width: 150px; padding-top: 5px;">Date of Issue</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="border-top: 1px solid black; width: 150px; padding-top: 5px;">HOD Signature</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // 1. Authentication Logic
-        function handleLogin(e) {
-            e.preventDefault(); // Prevents page reload
-            // Add a simple loading effect
-            const btn = e.target.querySelector('button');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Authenticating...';
+        // --- 1. Login & Logout Logic ---
+        function processLogin(e) {
+            e.preventDefault();
+            const btn = document.getElementById('login-btn');
+            const originalText = btn.innerHTML;
             
+            // Loading state
+            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Authenticating...';
+            btn.classList.add('opacity-80', 'cursor-not-allowed');
+
             setTimeout(() => {
-                document.getElementById('login-page').style.opacity = '0';
+                // Hide Login, Show Main App
+                const loginGate = document.getElementById('login-gate');
+                loginGate.classList.add('fade-out');
+                
                 setTimeout(() => {
-                    document.getElementById('login-page').classList.add('hidden-view');
-                    document.getElementById('main-app').classList.remove('hidden-view');
-                    renderChart(); // Load graph only after login
-                }, 500);
-            }, 800);
+                    loginGate.style.display = 'none';
+                    document.getElementById('main-app').classList.remove('hidden-section');
+                    renderChart(); // Initialize graph ONLY after login
+                }, 400);
+
+            }, 1000);
         }
 
-        function handleLogout() {
-            document.getElementById('main-app').classList.add('hidden-view');
-            const loginPage = document.getElementById('login-page');
-            loginPage.classList.remove('hidden-view');
-            // Small delay to allow display block to apply before animating opacity
-            setTimeout(() => {
-                loginPage.style.opacity = '1';
-                document.getElementById('loginForm').reset();
-                document.querySelector('#loginForm button').innerHTML = 'Secure Login';
-            }, 50);
+        function processLogout() {
+            // Reset Form and UI
+            document.getElementById('auth-form').reset();
+            const btn = document.getElementById('login-btn');
+            btn.innerHTML = '<span>Access Portal</span> <i class="fas fa-arrow-right"></i>';
+            btn.classList.remove('opacity-80', 'cursor-not-allowed');
+
+            // Hide App, Show Login
+            document.getElementById('main-app').classList.add('hidden-section');
+            const loginGate = document.getElementById('login-gate');
+            loginGate.style.display = 'flex';
+            loginGate.classList.remove('fade-out');
+            loginGate.classList.add('fade-in');
+            
+            // Default back to dashboard tab silently
+            switchTab('dashboard');
         }
 
-        // 2. Tab Navigation Logic (Simulating Multiple Pages)
+        // --- 2. Tab Navigation Logic (SPA Behavior) ---
         function switchTab(tabId) {
-            // Hide all views
-            document.querySelectorAll('.page-view').forEach(view => {
-                view.classList.add('hidden-view');
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.add('hidden-section');
+                tab.classList.remove('fade-in');
             });
-            // Remove active class from all buttons
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('active-tab', 'hover:bg-gray-100');
-                if(!btn.classList.contains('active-tab')) btn.classList.add('hover:bg-gray-100');
+            
+            // Reset all nav buttons styling
+            document.querySelectorAll('.nav-item').forEach(nav => {
+                nav.classList.remove('active-nav');
+                nav.classList.add('text-gray-400');
             });
 
-            // Show selected view
-            document.getElementById(`view-${tabId}`).classList.remove('hidden-view');
+            // Show selected tab
+            const activeTab = document.getElementById(`tab-${tabId}`);
+            activeTab.classList.remove('hidden-section');
             
-            // Highlight selected tab
-            const activeBtn = document.getElementById(`tab-${tabId}`);
-            activeBtn.classList.add('active-tab');
-            activeBtn.classList.remove('hover:bg-gray-100');
+            // Trigger reflow for animation
+            void activeTab.offsetWidth; 
+            activeTab.classList.add('fade-in');
+
+            // Highlight active nav button
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            activeNav.classList.add('active-nav');
+            activeNav.classList.remove('text-gray-400');
         }
 
-        // 3. Graph Generation Logic
-        let chartInstance = null;
+        // --- 3. Chart.js Implementation ---
+        let attChart = null;
         function renderChart() {
-            const ctx = document.getElementById('performanceChart').getContext('2d');
-            if(chartInstance) chartInstance.destroy(); // Prevent duplicate rendering
+            const ctx = document.getElementById('mainChart').getContext('2d');
             
-            chartInstance = new Chart(ctx, {
-                type: 'line',
+            // Destroy previous instance if exists (prevents overlap bug)
+            if(attChart) attChart.destroy();
+
+            // Gradient for chart fill
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)'); // brandBlue with opacity
+            gradient.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
+
+            attChart = new Chart(ctx, {
+                type: 'bar',
                 data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
                     datasets: [{
-                        label: 'Average Institute Score',
-                        data: [65, 78, 72, 85, 82, 90],
-                        borderColor: '#2563eb',
-                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                        borderWidth: 3,
-                        fill: true,
-                        tension: 0.4
+                        label: 'Present Students',
+                        data: [1150, 1200, 1180, 1220, 1190, 1240],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6,
+                        borderSkipped: false,
                     }]
                 },
                 options: {
                     responsive: true,
+                    maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { beginAtZero: true, max: 100 } }
+                    scales: {
+                        y: { 
+                            beginAtZero: true, 
+                            max: 1300,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
+                        }
+                    }
                 }
             });
         }
 
-        // 4. Professional PDF Generation
-        function downloadPDF() {
-            const element = document.getElementById('pdf-document');
+        // --- 4. Professional PDF Generation ---
+        function downloadDocument() {
+            // Briefly show the hidden template to capture it, then hide it again
+            const pdfContainer = document.getElementById('pdf-container');
+            const element = document.getElementById('pdf-template');
+            
+            pdfContainer.style.display = 'block';
+            element.style.display = 'block';
+
             const opt = {
                 margin:       0.5,
-                filename:     'Official_Marksheet.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
+                filename:     'Rishabh_Official_Marksheet.pdf',
+                image:        { type: 'jpeg', quality: 1 },
+                html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
             };
 
-            // Alert user that download is starting
-            alert("Generating Professional PDF Document...");
-            html2pdf().set(opt).from(element).save();
+            // Generate and save
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Hide it back after generating
+                pdfContainer.style.display = 'none';
+                element.style.display = 'none';
+            });
         }
     </script>
 </body>
