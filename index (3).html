@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P for Problem v4.1 | Final Version</title>
+    <title>P for Problem v5.1 | Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -32,30 +32,34 @@
             color: #f8fafc;
             min-height: 100vh;
         }
-   .glass-panel {
+       .glass-panel {
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(148, 163, 184, 0.1);
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-   .neon-text {
+       .neon-text {
             background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-   .page-section { display: none; }
-   .active-page { display: block; animation: fadeIn 0.3s ease-in-out; }
-   .nav-btn.active {
+       .page-section { display: none; }
+       .active-page { display: block; animation: fadeIn 0.3s ease-in-out; }
+       .nav-btn.active {
             background: linear-gradient(135deg, rgba(59, 130, 246, 0.3) 0%, rgba(147, 51, 234, 0.3) 100%);
             border: 1px solid rgba(59, 130, 246, 0.5);
             color: #60a5fa;
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 768px) {
-       .nav-container { overflow-x: auto; }
-       .nav-container::-webkit-scrollbar { display: none; }
+           .nav-container { overflow-x: auto; }
+           .nav-container::-webkit-scrollbar { display: none; }
         }
+       .break-all { word-break: break-all; }
+       .editable:hover { outline: 2px dashed #3b82f6; cursor: pointer; }
+       .admin-only { display: none; }
+       .admin.admin-only { display: inline-block; }
     </style>
 </head>
 <body>
@@ -63,12 +67,12 @@
         <div class="glass-panel p-8 md:p-10 rounded-3xl w-full max-w-md">
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-bold neon-text mb-2">P for Problem</h1>
-                <p class="text-slate-400 text-sm">v4.1 Final Portal</p>
+                <p class="text-slate-400 text-sm">v5.1 Fixed</p>
             </div>
             <div class="space-y-4">
                 <div>
                     <label class="block text-sm text-slate-300 mb-2">Login As</label>
-                    <select id="login-role" class="w-full bg-slate-900/80 border-slate-700 rounded-xl p-3 text-white outline-none focus:border-blue-500">
+                    <select id="login-role" class="w-full bg-slate-900/80 border-slate-700 rounded-xl p-3 text-white outline-none focus:border-blue-500" onchange="updateLoginID()">
                         <option value="admin">Administrator</option>
                         <option value="student">Student</option>
                     </select>
@@ -93,7 +97,7 @@
             <div class="max-w-7xl mx-auto flex items-center justify-between flex-wrap gap-3">
                 <h2 class="text-lg md:text-xl font-bold neon-text flex items-center gap-2">
                     <i class="fas fa-layer-group"></i>
-                    <span id="college-name-display" onclick="editCollegeName()" class="cursor-pointer hover:text-blue-300 transition-colors" title="Admin: Click to edit">ABC College</span>
+                    <span id="college-name-display" onclick="editField('collegeName')" class="editable" title="Admin: Click to edit">ABC College</span>
                 </h2>
                 <div class="nav-container flex gap-2 overflow-x-auto">
                     <button onclick="nav('dashboard')" id="nav-dashboard" class="nav-btn active px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm whitespace-nowrap">
@@ -108,6 +112,12 @@
                     <button onclick="nav('issue')" id="nav-issue" class="nav-btn px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm whitespace-nowrap">
                         <i class="fas fa-headset mr-1"></i> Contact
                     </button>
+                    <button onclick="nav('admin')" id="nav-admin" class="nav-btn px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm whitespace-nowrap hidden">
+                        <i class="fas fa-users-cog mr-1"></i> Admin Panel
+                    </button>
+                    <button onclick="nav('issues')" id="nav-issues" class="nav-btn px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm whitespace-nowrap hidden">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> Issues
+                    </button>
                     <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm whitespace-nowrap">
                         <i class="fas fa-power-off mr-1"></i> Logout
                     </button>
@@ -117,7 +127,13 @@
 
         <main class="flex-1 p-4 md:p-6 max-w-7xl mx-auto w-full">
             <section id="page-dashboard" class="page-section active-page">
-                <h2 class="text-2xl md:text-3xl font-bold mb-6">College Notice Board</h2>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold">College Notice Board</h2>
+                    <div class="admin-only flex gap-2">
+                        <button onclick="editField('noticeText')" id="edit-notice-btn" class="bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 px-4 py-2 rounded-xl text-sm">
+                            <i class="fas fa-edit mr-1"></i> Edit Notice
+                        </button>
+                    </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="glass-panel p-6 rounded-2xl border-l-4 border-blue-500">
                         <div class="flex items-start gap-3 mb-3">
@@ -126,9 +142,10 @@
                             </div>
                             <div class="flex-1">
                                 <h3 class="text-lg font-bold text-blue-400">Latest Notice</h3>
-                                <p class="text-xs text-slate-500 mt-1">Posted by Admin • 2 days ago</p>
+                                <p class="text-xs text-slate-500 mt-1">Posted by Admin</p>
                             </div>
-                        <p class="text-slate-300 text-sm leading-relaxed">Mid Term Exams will start from 15th May 2026. All students must submit assignments before 10th May.</p>
+                        </div>
+                        <p id="notice-text" class="text-slate-300 text-sm leading-relaxed break-words">Mid Term Exams will start from 15th May 2026. All students must submit assignments before 10th May.</p>
                     </div>
                     <div class="glass-panel p-6 rounded-2xl border-l-4 border-purple-500">
                         <div class="flex items-start gap-3 mb-3">
@@ -138,67 +155,84 @@
                             <div class="flex-1">
                                 <h3 class="text-lg font-bold text-purple-400">Upcoming Events</h3>
                             </div>
-                        </div>
-                        <ul class="text-slate-300 space-y-3 text-sm">
-                            <li class="flex items-center gap-2"><i class="fas fa-circle text-xs text-emerald-400"></i> Tech Fest 2026 - 20th May</li>
-                            <li class="flex items-center gap-2"><i class="fas fa-circle text-xs text-blue-400"></i> Sports Day - 25th May</li>
-                            <li class="flex items-center gap-2"><i class="fas fa-circle text-xs text-amber-400"></i> Summer Break - 1st June</li>
-                        </ul>
+                        <ul id="events-list" class="text-slate-300 space-y-3 text-sm"></ul>
                     </div>
                 </div>
             </section>
 
             <section id="page-profile" class="page-section">
-                <h2 class="text-2xl md:text-3xl font-bold mb-6">Student Profile</h2>
-                <div class="glass-panel p-6 rounded-2xl mb-6">
-                    <div class="flex flex-col md:flex-row items-start gap-6">
-                        <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white shrink-0">
-                            <span id="prof-init">R</span>
-                        </div>
-                        <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm w-full">
-                            <div><p class="text-slate-500 mb-1">Full Name</p><p class="font-semibold text-lg" id="prof-name">Rishabh Kumar</p></div>
-                            <div><p class="text-slate-500 mb-1">Roll Number</p><p class="font-semibold text-lg text-blue-400" id="prof-roll">101</p></div>
-                            <div><p class="text-slate-500 mb-1">Section</p><p class="font-semibold" id="prof-sec">Section A</p></div>
-                            <div><p class="text-slate-500 mb-1">Father's Name</p><p class="font-semibold" id="prof-fname">Rajesh Kumar</p></div>
-                            <div><p class="text-slate-500 mb-1">Course</p><p class="font-semibold" id="prof-course">BCA</p></div>
-                            <div><p class="text-slate-500 mb-1">College</p><p class="font-semibold text-emerald-400" id="prof-col">ABC College</p></div>
-                        </div>
-                    </div>
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold">Student Profile</h2>
+                    <button onclick="saveStudentData()" id="save-student-btn" class="hidden bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 px-4 py-2 rounded-xl text-sm">
+                        <i class="fas fa-save mr-1"></i> Save Changes
+                    </button>
                 </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="glass-panel p-6 rounded-2xl text-center">
-                        <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-chart-bar text-blue-400 text-xl"></i>
+                <div id="student-not-loaded" class="glass-panel p-8 rounded-2xl text-center">
+                    <i class="fas fa-user-slash text-4xl text-slate-600 mb-4"></i>
+                    <p class="text-slate-400">Admin: Please search a student from Admin Panel</p>
+                    <p class="text-slate-500 text-sm mt-2">Student: Login with your Roll Number</p>
+                </div>
+                <div id="student-profile-content" class="hidden">
+                    <div class="glass-panel p-6 rounded-2xl mb-6">
+                        <div class="flex flex-col md:flex-row items-start gap-6">
+                            <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-3xl font-bold text-white shrink-0">
+                                <span id="prof-init">R</span>
+                            </div>
+                            <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm w-full">
+                                <div><p class="text-slate-500 mb-1">Full Name</p><p class="font-semibold text-lg editable" id="prof-name" onclick="editStudentField('name')">-</p></div>
+                                <div><p class="text-slate-500 mb-1">Roll Number</p><p class="font-semibold text-lg text-blue-400" id="prof-roll">-</p></div>
+                                <div><p class="text-slate-500 mb-1">Section</p><p class="font-semibold editable" id="prof-sec" onclick="editStudentField('section')">-</p></div>
+                                <div><p class="text-slate-500 mb-1">Father's Name</p><p class="font-semibold editable" id="prof-fname" onclick="editStudentField('fName')">-</p></div>
+                                <div><p class="text-slate-500 mb-1">Course</p><p class="font-semibold editable" id="prof-course" onclick="editStudentField('course')">-</p></div>
+                                <div><p class="text-slate-500 mb-1">College</p><p class="font-semibold text-emerald-400" id="prof-col">-</p></div>
+                            </div>
                         </div>
-                        <p class="text-xs text-slate-400 mb-1">Sem Attendance</p>
-                        <h4 class="text-3xl font-bold text-emerald-400">92%</h4>
-                        <p class="text-xs text-slate-500 mt-2">184 / 200 Days</p>
-                    </div>
-                    <div class="glass-panel p-6 rounded-2xl text-center">
-                        <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-graduation-cap text-purple-400 text-xl"></i>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="glass-panel p-6 rounded-2xl text-center">
+                            <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-chart-bar text-blue-400 text-xl"></i>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-1">Sem Attendance</p>
+                            <h4 class="text-3xl font-bold text-emerald-400 editable" id="prof-att" onclick="editStudentField('attendance')">-</h4>
+                            <p class="text-xs text-slate-500 mt-2 editable" id="prof-att-days" onclick="editStudentField('attDays')">-</p>
                         </div>
-                        <p class="text-xs text-slate-400 mb-1">Current SGPA</p>
-                        <h4 class="text-3xl font-bold text-white">8.5</h4>
-                        <p class="text-xs text-slate-500 mt-2">CGPA: 8.2</p>
-                    </div>
-                    <div class="glass-panel p-6 rounded-2xl text-center">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
-                            <i class="fas fa-check-circle text-emerald-400 text-xl"></i>
+                        <div class="glass-panel p-6 rounded-2xl text-center">
+                            <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-graduation-cap text-purple-400 text-xl"></i>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-1">Current SGPA</p>
+                            <h4 class="text-3xl font-bold text-white editable" id="prof-sgpa" onclick="editStudentField('sgpa')">-</h4>
+                            <p class="text-xs text-slate-500 mt-2 editable" id="prof-cgpa" onclick="editStudentField('cgpa')">-</p>
                         </div>
-                        <p class="text-xs text-slate-400 mb-1">Academic Status</p>
-                        <h4 class="text-3xl font-bold text-emerald-400">Pass</h4>
-                        <p class="text-xs text-slate-500 mt-2">All Clear</p>
+                        <div class="glass-panel p-6 rounded-2xl text-center">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center mx-auto mb-3">
+                                <i class="fas fa-check-circle text-emerald-400 text-xl"></i>
+                            </div>
+                            <p class="text-xs text-slate-400 mb-1">Academic Status</p>
+                            <h4 class="text-3xl font-bold text-emerald-400 editable" id="prof-status" onclick="editStudentField('status')">-</h4>
+                            <p class="text-xs text-slate-500 mt-2 editable" id="prof-status-note" onclick="editStudentField('statusNote')">-</p>
+                        </div>
                     </div>
                 </div>
             </section>
-                        <section id="page-reports" class="page-section">
-                <h2 class="text-2xl md:text-3xl font-bold mb-6">Academic Reports & Marksheet</h2>
-                <div class="glass-panel rounded-2xl overflow-hidden">
+
+            <section id="page-reports" class="page-section">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl md:text-3xl font-bold">Academic Reports & Marksheet</h2>
+                    <div class="flex gap-2">
+                        <button onclick="downloadMarksheet()" class="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 px-4 py-2 rounded-xl text-sm">
+                            <i class="fas fa-download mr-1"></i> Download CSV
+                        </button>
+                    </div>
+                </div>
+                <div id="marksheet-not-loaded" class="glass-panel p-8 rounded-2xl text-center">
+                    <i class="fas fa-file-circle-xmark text-4xl text-slate-600 mb-4"></i>
+                    <p class="text-slate-400">No student selected. Admin: Search from Admin Panel</p>
+                </div>
+                <div id="marksheet-content" class="glass-panel rounded-2xl overflow-hidden hidden">
                     <div class="p-5 bg-slate-800/50 border-b border-slate-700">
                         <h3 class="font-bold text-lg">Semester Marksheet</h3>
-                        <p class="text-xs text-slate-400 mt-1">Current Semester Performance</p>
+                        <p class="text-xs text-slate-400 mt-1" id="marksheet-student">-</p>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm">
@@ -210,32 +244,14 @@
                                     <th class="p-4 text-right">Grade</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-800/50">
-                                <tr class="hover:bg-slate-800/30">
-                                    <td class="p-4 font-medium">Mathematics</td>
-                                    <td class="p-4 text-center">100</td>
-                                    <td class="p-4 text-center font-semibold">85</td>
-                                    <td class="p-4 text-right"><span class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold">A</span></td>
-                                </tr>
-                                <tr class="hover:bg-slate-800/30">
-                                    <td class="p-4 font-medium">Physics</td>
-                                    <td class="p-4 text-center">100</td>
-                                    <td class="p-4 text-center font-semibold">78</td>
-                                    <td class="p-4 text-right"><span class="px-3 py-1 rounded-lg bg-blue-500/20 text-blue-400 text-xs font-bold">B+</span></td>
-                                </tr>
-                                <tr class="hover:bg-slate-800/30">
-                                    <td class="p-4 font-medium">Chemistry</td>
-                                    <td class="p-4 text-center">100</td>
-                                    <td class="p-4 text-center font-semibold">92</td>
-                                    <td class="p-4 text-right"><span class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-xs font-bold">A+</span></td>
-                                </tr>
+                            <tbody id="marksheet-body" class="divide-y divide-slate-800/50">
                             </tbody>
                             <tfoot class="bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-t-2 border-blue-500/50 font-bold">
                                 <tr>
                                     <td class="p-4 text-blue-400">GRAND TOTAL</td>
-                                    <td class="p-4 text-center">300</td>
-                                    <td class="p-4 text-center text-emerald-400">255</td>
-                                    <td class="p-4 text-right text-emerald-400">85%</td>
+                                    <td class="p-4 text-center" id="total-max">-</td>
+                                    <td class="p-4 text-center text-emerald-400" id="total-obt">-</td>
+                                    <td class="p-4 text-right text-emerald-400" id="total-perc">-</td>
                                 </tr>
                             </tfoot>
                         </table>
@@ -257,27 +273,28 @@
                         <div class="space-y-4 text-sm">
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-user text-slate-500 w-5 mt-1"></i>
-                                <div>
+                                <div class="flex-1 min-w-0">
                                     <p class="text-slate-500 text-xs">Admin Name</p>
-                                    <p class="text-slate-300 font-semibold">Dr. Sharma</p>
+                                    <p class="text-slate-300 font-semibold break-words" id="admin-name">Dr. Sharma</p>
                                 </div>
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-phone text-slate-500 w-5 mt-1"></i>
-                                <div>
+                                <div class="flex-1 min-w-0">
                                     <p class="text-slate-500 text-xs">Phone</p>
-                                    <p class="text-slate-300 font-semibold">+91 98765 43210</p>
+                                    <p class="text-slate-300 font-semibold break-all" id="admin-phone">+91 98765 43210</p>
                                 </div>
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-envelope text-slate-500 w-5 mt-1"></i>
-                                <div>
+                                <div class="flex-1 min-w-0">
                                     <p class="text-slate-500 text-xs">Email</p>
-                                    <p class="text-slate-300 font-semibold">admin@abccollege.edu</p>
+                                    <p class="text-slate-300 font-semibold break-all" id="admin-email">admin@abccollege.edu</p>
                                 </div>
+                            </div>
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-clock text-slate-500 w-5 mt-1"></i>
-                                <div>
+                                <div class="flex-1 min-w-0">
                                     <p class="text-slate-500 text-xs">Office Hours</p>
-                                    <p class="text-slate-300 font-semibold">10:00 AM - 4:00 PM</p>
+                                    <p class="text-slate-300 font-semibold break-words" id="admin-hours">10:00 AM - 4:00 PM</p>
                                 </div>
                             </div>
                         </div>
@@ -295,16 +312,113 @@
                     </div>
                 </div>
             </section>
+
+            <section id="page-admin" class="page-section">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6">Admin Control Panel</h2>
+                <div class="glass-panel p-6 rounded-2xl mb-6">
+                    <h3 class="text-lg font-bold text-blue-400 mb-4"><i class="fas fa-search mr-2"></i>Search Student</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <input type="text" id="search-roll" placeholder="Roll No (e.g., 01)" class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-blue-500">
+                        <input type="text" id="search-sec" placeholder="Section (e.g., A)" class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-blue-500">
+                        <input type="text" id="search-course" placeholder="Course (e.g., BCA)" class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-blue-500">
+                        <button onclick="searchStudent()" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-3 rounded-xl">
+                            <i class="fas fa-search mr-1"></i> Search
+                        </button>
+                    </div>
+                <div class="glass-panel p-6 rounded-2xl mb-6">
+                    <h3 class="text-lg font-bold text-emerald-400 mb-4"><i class="fas fa-edit mr-2"></i>Edit Contact Details</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" id="edit-admin-name" placeholder="Admin Name" class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-emerald-500">
+                        <input type="text" id="edit-admin-phone" placeholder="Phone" class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-emerald-500">
+                        <input type="text" id="edit-admin-email" placeholder="Email" class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-emerald-500">
+                        <input type="text" id="edit-admin-hours" placeholder="Office Hours" class="bg-slate-900/80 border border-slate-700 rounded-xl p-3 text-white outline-none focus:border-emerald-500">
+                    </div>
+                    <button onclick="updateContact()" class="mt-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 px-6 py-2 rounded-xl">
+                        <i class="fas fa-save mr-1"></i> Update Contact
+                    </button>
+                </div>
+                <div id="search-results" class="glass-panel p-6 rounded-2xl hidden">
+                    <h3 class="text-lg font-bold text-purple-400 mb-4"><i class="fas fa-users mr-2"></i>Search Results</h3>
+                    <div id="results-list" class="space-y-3"></div>
+                </div>
+            </section>
+
+            <section id="page-issues" class="page-section">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6">Student Issues</h2>
+                <div class="glass-panel p-6 rounded-2xl">
+                    <div id="issues-list" class="space-y-4">
+                        <p class="text-slate-400 text-center py-8">No issues submitted yet</p>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
     <script>
         let currentUserRole = '';
-        let collegeName = 'ABC College';
-        let studentsDB = {
-            "101": { name: "Rishabh Kumar", roll: "101", fName: "Rajesh Kumar", section: "A", course: "BCA", college: "ABC College" },
-            "102": { name: "Amit Singh", roll: "102", fName: "Suresh Singh", section: "A", course: "BCA", college: "ABC College" }
+        let collegeName = localStorage.getItem('collegeName') || 'ABC College';
+        let currentStudent = null;
+        let noticeText = localStorage.getItem('noticeText') || 'Mid Term Exams will start from 15th May 2026. All students must submit assignments before 10th May.';
+        let eventsList = JSON.parse(localStorage.getItem('eventsList')) || [
+            'Tech Fest 2026 - 20th May',
+            'Sports Day - 25th May',
+            'Summer Break - 1st June'
+        ];
+        let contactInfo = JSON.parse(localStorage.getItem('contactInfo')) || {
+            name: 'Dr. Sharma',
+            phone: '+91 98765 43210',
+            email: 'admin@abccollege.edu',
+            hours: '10:00 AM - 4:00 PM'
         };
+        let issuesDB = JSON.parse(localStorage.getItem('issuesDB')) || [];
+        let studentsDB = JSON.parse(localStorage.getItem('studentsDB')) || {
+            "01": {
+                name: "Rani Kumari", roll: "01", fName: "Ramesh Kumar", section: "A", course: "BCA", college: "ABC College",
+                attendance: "92%", attDays: "184 / 200 Days", sgpa: "8.5", cgpa: "CGPA: 8.2", status: "Pass", statusNote: "All Clear",
+                marks: [
+                    {subject: "Mathematics", max: 100, obt: 85, grade: "A"},
+                    {subject: "Physics", max: 100, obt: 78, grade: "B+"},
+                    {subject: "Chemistry", max: 100, obt: 92, grade: "A+"}
+                ]
+            },
+            "02": {
+                name: "Amit Singh", roll: "02", fName: "Suresh Singh", section: "A", course: "BCA", college: "ABC College",
+                attendance: "88%", attDays: "176 / 200 Days", sgpa: "7.8", cgpa: "CGPA: 7.5", status: "Pass", statusNote: "All Clear",
+                marks: [
+                    {subject: "Mathematics", max: 100, obt: 75, grade: "B+"},
+                    {subject: "Physics", max: 100, obt: 82, grade: "A"},
+                    {subject: "Chemistry", max: 100, obt: 79, grade: "B+"}
+                ]
+            },
+            "03": {
+                name: "Priya Sharma", roll: "03", fName: "Ramesh Sharma", section: "B", course: "BCA", college: "ABC College",
+                attendance: "95%", attDays: "190 / 200 Days", sgpa: "9.2", cgpa: "CGPA: 9.0", status: "Pass", statusNote: "All Clear",
+                marks: [
+                    {subject: "Mathematics", max: 100, obt: 95, grade: "A+"},
+                    {subject: "Physics", max: 100, obt: 88, grade: "A"},
+                    {subject: "Chemistry", max: 100, obt: 91, grade: "A+"}
+                ]
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('college-name-display').innerText = collegeName;
+            document.getElementById('notice-text').innerText = noticeText;
+            renderEvents();
+            updateContactDisplay();
+            renderIssues();
+        });
+
+        function updateLoginID() {
+            const role = document.getElementById('login-role').value;
+            if(role === 'admin') {
+                document.getElementById('login-id').value = 'admin';
+                document.getElementById('login-pass').value = 'admin123';
+            } else {
+                document.getElementById('login-id').value = '01';
+                document.getElementById('login-pass').value = '';
+            }
+        }
 
         function handleLogin() {
             const role = document.getElementById('login-role').value;
@@ -316,16 +430,44 @@
             currentUserRole = role;
             document.getElementById('login-overlay').style.display = 'none';
             document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('main-app').classList.add(currentUserRole === 'admin'? 'admin' : 'student');
             document.getElementById('college-name-display').innerText = collegeName;
-            if(role === 'student') loadProfile(id);
+            updateUIForRole();
+            if(role === 'student') {
+                loadProfile(id);
+                loadMarksheet(id);
+            }
             nav('dashboard');
+        }
+
+        function updateUIForRole() {
+            if(currentUserRole === 'admin') {
+                document.getElementById('nav-admin').classList.remove('hidden');
+                document.getElementById('nav-issues').classList.remove('hidden');
+                document.getElementById('nav-profile').classList.add('hidden');
+                document.getElementById('edit-notice-btn').classList.remove('hidden');
+                document.getElementById('save-student-btn').classList.remove('hidden');
+            } else {
+                document.getElementById('nav-admin').classList.add('hidden');
+                document.getElementById('nav-issues').classList.add('hidden');
+                document.getElementById('nav-profile').classList.remove('hidden');
+                document.getElementById('edit-notice-btn').classList.add('hidden');
+                document.getElementById('save-student-btn').classList.add('hidden');
+            }
         }
 
         function logout() {
             document.getElementById('login-overlay').style.display = 'flex';
             document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('admin', 'student');
+            document.getElementById('login-role').value = 'admin';
             document.getElementById('login-id').value = 'admin';
             document.getElementById('login-pass').value = 'admin123';
+            currentStudent = null;
+            document.getElementById('student-not-loaded').classList.remove('hidden');
+            document.getElementById('student-profile-content').classList.add('hidden');
+            document.getElementById('marksheet-not-loaded').classList.remove('hidden');
+            document.getElementById('marksheet-content').classList.add('hidden');
         }
 
         function nav(pageName) {
@@ -334,11 +476,20 @@
             document.getElementById(`page-${pageName}`).classList.add('active-page');
             document.getElementById(`nav-${pageName}`).classList.add('active');
             window.scrollTo(0, 0);
+
+            if(pageName === 'profile' && currentUserRole === 'admin') {
+                document.getElementById('student-not-loaded').classList.remove('hidden');
+                document.getElementById('student-profile-content').classList.add('hidden');
+            }
+            if(pageName === 'issues') renderIssues();
         }
 
         function loadProfile(roll) {
             const s = studentsDB[roll];
             if(!s) return;
+            currentStudent = s;
+            document.getElementById('student-not-loaded').classList.add('hidden');
+            document.getElementById('student-profile-content').classList.remove('hidden');
             document.getElementById('prof-name').innerText = s.name;
             document.getElementById('prof-roll').innerText = s.roll;
             document.getElementById('prof-sec').innerText = `Section ${s.section}`;
@@ -346,29 +497,5 @@
             document.getElementById('prof-course').innerText = s.course;
             document.getElementById('prof-col').innerText = collegeName;
             document.getElementById('prof-init').innerText = s.name[0];
-        }
-
-        function submitIssue() {
-            const text = document.getElementById('issue-text').value;
-            if(!text.trim()) return alert('Please write your issue first');
-            alert('✅ Issue submitted to Admin successfully!\nAdmin will contact you within 24 hours.');
-            document.getElementById('issue-text').value = '';
-        }
-
-        function editCollegeName() {
-            if(currentUserRole!== 'admin') {
-                alert('Only Admin can edit college name');
-                return;
-            }
-            const currentName = document.getElementById('college-name-display').innerText;
-            const newName = prompt('Enter new college name:', currentName);
-            if(newName && newName.trim()) {
-                collegeName = newName.trim();
-                document.getElementById('college-name-display').innerText = collegeName;
-                document.getElementById('prof-col').innerText = collegeName;
-                alert('College name updated to: ' + collegeName);
-            }
-        }
-    </script>
-</body>
-                        </html>
+            document.getElementById('prof-att').innerText = s.attendance;
+            document.getElementBy
