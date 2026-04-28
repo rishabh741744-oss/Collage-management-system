@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P for Problem v4.3 | Final Fixed</title>
+    <title>P for Problem v4.4 | Final Working</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -56,8 +56,8 @@
  .nav-container { overflow-x: auto; }
  .nav-container::-webkit-scrollbar { display: none; }
         }
-   .break-all { word-break: break-all; }
-   .editable:hover { outline: 2px dashed #3b82f6; cursor: pointer; }
+  .break-all { word-break: break-all; }
+  .editable:hover { outline: 2px dashed #3b82f6; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -65,7 +65,7 @@
         <div class="glass-panel p-8 md:p-10 rounded-3xl w-full max-w-md">
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-bold neon-text mb-2">P for Problem</h1>
-                <p class="text-slate-400 text-sm">v4.3 Final Fixed</p>
+                <p class="text-slate-400 text-sm">v4.4 Final Working</p>
             </div>
             <div class="space-y-4">
                 <div>
@@ -182,6 +182,7 @@
                                 <div><p class="text-slate-500 mb-1">College</p><p class="font-semibold text-emerald-400" id="prof-col">-</p></div>
                             </div>
                         </div>
+                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="glass-panel p-6 rounded-2xl text-center">
                             <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mx-auto mb-3">
@@ -395,7 +396,6 @@
             }
         };
 
-        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('college-name-display').innerText = collegeName;
             document.getElementById('notice-text').innerText = noticeText;
@@ -470,8 +470,9 @@
         }
 
         function loadProfile(roll) {
-            const s = studentsDB;
+            const s = studentsDB[roll];
             if(!s) return;
+            currentStudent = s;
             document.getElementById('student-not-loaded').classList.add('hidden');
             document.getElementById('student-profile-content').classList.remove('hidden');
             document.getElementById('prof-name').innerText = s.name;
@@ -490,7 +491,7 @@
         }
 
         function loadMarksheet(roll) {
-            const s = studentsDB;
+            const s = studentsDB[roll];
             if(!s) return;
             document.getElementById('marksheet-not-loaded').classList.add('hidden');
             document.getElementById('marksheet-content').classList.remove('hidden');
@@ -513,4 +514,16 @@
             });
             let perc = ((totalObt/totalMax)*100).toFixed(0);
             document.getElementById('total-max').innerText = totalMax;
-            document.getElementById('total-obt').innerText = total
+            document.getElementById('total-obt').innerText = totalObt;
+            document.getElementById('total-perc').innerText = perc + '%';
+        }
+
+        function searchStudent() {
+            const roll = document.getElementById('search-roll').value.trim();
+            const sec = document.getElementById('search-sec').value.trim().toUpperCase();
+            const course = document.getElementById('search-course').value.trim().toUpperCase();
+
+            let results = Object.values(studentsDB).filter(s => {
+                let match = true;
+                if(roll && s.roll!== roll) match = false;
+                if(sec
