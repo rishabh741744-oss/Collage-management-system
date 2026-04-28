@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P for Problem v4.2 | Admin Control</title>
+    <title>P for Problem v4.3 | Final Fixed</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -53,11 +53,11 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 768px) {
-  .nav-container { overflow-x: auto; }
-  .nav-container::-webkit-scrollbar { display: none; }
+ .nav-container { overflow-x: auto; }
+ .nav-container::-webkit-scrollbar { display: none; }
         }
-    .break-all { word-break: break-all; }
-    .editable:hover { outline: 2px dashed #3b82f6; cursor: pointer; }
+   .break-all { word-break: break-all; }
+   .editable:hover { outline: 2px dashed #3b82f6; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -65,7 +65,7 @@
         <div class="glass-panel p-8 md:p-10 rounded-3xl w-full max-w-md">
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-bold neon-text mb-2">P for Problem</h1>
-                <p class="text-slate-400 text-sm">v4.2 Admin Control</p>
+                <p class="text-slate-400 text-sm">v4.3 Final Fixed</p>
             </div>
             <div class="space-y-4">
                 <div>
@@ -113,6 +113,9 @@
                     <button onclick="nav('admin')" id="nav-admin" class="nav-btn px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm whitespace-nowrap hidden">
                         <i class="fas fa-users-cog mr-1"></i> Admin Panel
                     </button>
+                    <button onclick="nav('issues')" id="nav-issues" class="nav-btn px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm whitespace-nowrap hidden">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> Issues
+                    </button>
                     <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 px-3 md:px-4 py-2 rounded-xl text-xs md:text-sm whitespace-nowrap">
                         <i class="fas fa-power-off mr-1"></i> Logout
                     </button>
@@ -136,9 +139,8 @@
                             </div>
                             <div class="flex-1">
                                 <h3 class="text-lg font-bold text-blue-400">Latest Notice</h3>
-                                <p class="text-xs text-slate-500 mt-1">Posted by Admin • 2 days ago</p>
+                                <p class="text-xs text-slate-500 mt-1">Posted by Admin • <span id="notice-date">2 days ago</span></p>
                             </div>
-                        </div>
                         <p id="notice-text" class="text-slate-300 text-sm leading-relaxed break-words">Mid Term Exams will start from 15th May 2026. All students must submit assignments before 10th May.</p>
                     </div>
                     <div class="glass-panel p-6 rounded-2xl border-l-4 border-purple-500">
@@ -149,7 +151,6 @@
                             <div class="flex-1">
                                 <h3 class="text-lg font-bold text-purple-400">Upcoming Events</h3>
                             </div>
-                        </div>
                         <ul id="events-list" class="text-slate-300 space-y-3 text-sm">
                             <li class="flex items-center gap-2"><i class="fas fa-circle text-xs text-emerald-400"></i> Tech Fest 2026 - 20th May</li>
                             <li class="flex items-center gap-2"><i class="fas fa-circle text-xs text-blue-400"></i> Sports Day - 25th May</li>
@@ -181,7 +182,6 @@
                                 <div><p class="text-slate-500 mb-1">College</p><p class="font-semibold text-emerald-400" id="prof-col">-</p></div>
                             </div>
                         </div>
-                    </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div class="glass-panel p-6 rounded-2xl text-center">
                             <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mx-auto mb-3">
@@ -270,7 +270,6 @@
                                     <p class="text-slate-500 text-xs">Admin Name</p>
                                     <p class="text-slate-300 font-semibold break-words" id="admin-name">Dr. Sharma</p>
                                 </div>
-                            </div>
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-phone text-slate-500 w-5 mt-1"></i>
                                 <div class="flex-1 min-w-0">
@@ -283,7 +282,6 @@
                                     <p class="text-slate-500 text-xs">Email</p>
                                     <p class="text-slate-300 font-semibold break-all" id="admin-email">admin@abccollege.edu</p>
                                 </div>
-                            </div>
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-clock text-slate-500 w-5 mt-1"></i>
                                 <div class="flex-1 min-w-0">
@@ -292,7 +290,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
                     <div class="glass-panel p-6 rounded-2xl">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
@@ -320,6 +317,7 @@
                             <i class="fas fa-search mr-1"></i> Search
                         </button>
                     </div>
+                </div>
                 <div class="glass-panel p-6 rounded-2xl mb-6">
                     <h3 class="text-lg font-bold text-emerald-400 mb-4"><i class="fas fa-edit mr-2"></i>Edit Contact Details</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -337,25 +335,35 @@
                     <div id="results-list" class="space-y-3"></div>
                 </div>
             </section>
+
+            <section id="page-issues" class="page-section">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6">Student Issues</h2>
+                <div class="glass-panel p-6 rounded-2xl">
+                    <div id="issues-list" class="space-y-4">
+                        <p class="text-slate-400 text-center py-8">No issues submitted yet</p>
+                    </div>
+                </div>
+            </section>
         </main>
     </div>
 
     <script>
         let currentUserRole = '';
-        let collegeName = 'ABC College';
+        let collegeName = localStorage.getItem('collegeName') || 'ABC College';
         let currentStudent = null;
-        let noticeText = 'Mid Term Exams will start from 15th May 2026. All students must submit assignments before 10th May.';
-        let eventsList = [
+        let noticeText = localStorage.getItem('noticeText') || 'Mid Term Exams will start from 15th May 2026. All students must submit assignments before 10th May.';
+        let eventsList = JSON.parse(localStorage.getItem('eventsList')) || [
             'Tech Fest 2026 - 20th May',
             'Sports Day - 25th May',
             'Summer Break - 1st June'
         ];
-        let contactInfo = {
+        let contactInfo = JSON.parse(localStorage.getItem('contactInfo')) || {
             name: 'Dr. Sharma',
             phone: '+91 98765 43210',
             email: 'admin@abccollege.edu',
             hours: '10:00 AM - 4:00 PM'
         };
+        let issuesDB = JSON.parse(localStorage.getItem('issuesDB')) || [];
 
         let studentsDB = {
             "01": {
@@ -386,6 +394,14 @@
                 ]
             }
         };
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('college-name-display').innerText = collegeName;
+            document.getElementById('notice-text').innerText = noticeText;
+            updateContactDisplay();
+            renderIssues();
+        });
 
         function updateLoginID() {
             const role = document.getElementById('login-role').value;
@@ -421,10 +437,12 @@
         function updateUIForRole() {
             if(currentUserRole === 'admin') {
                 document.getElementById('nav-admin').classList.remove('hidden');
+                document.getElementById('nav-issues').classList.remove('hidden');
                 document.getElementById('nav-profile').classList.add('hidden');
                 document.getElementById('edit-notice-btn').classList.remove('hidden');
             } else {
                 document.getElementById('nav-admin').classList.add('hidden');
+                document.getElementById('nav-issues').classList.add('hidden');
                 document.getElementById('nav-profile').classList.remove('hidden');
                 document.getElementById('edit-notice-btn').classList.add('hidden');
             }
@@ -437,6 +455,10 @@
             document.getElementById('login-id').value = 'admin';
             document.getElementById('login-pass').value = 'admin123';
             currentStudent = null;
+            document.getElementById('student-not-loaded').classList.remove('hidden');
+            document.getElementById('student-profile-content').classList.add('hidden');
+            document.getElementById('marksheet-not-loaded').classList.remove('hidden');
+            document.getElementById('marksheet-content').classList.add('hidden');
         }
 
         function nav(pageName) {
@@ -491,34 +513,4 @@
             });
             let perc = ((totalObt/totalMax)*100).toFixed(0);
             document.getElementById('total-max').innerText = totalMax;
-            document.getElementById('total-obt').innerText = totalObt;
-            document.getElementById('total-perc').innerText = perc + '%';
-        }
-
-        function searchStudent() {
-            const roll = document.getElementById('search-roll').value.trim();
-            const sec = document.getElementById('search-sec').value.trim().toUpperCase();
-            const course = document.getElementById('search-course').value.trim().toUpperCase();
-
-            let results = Object.values(studentsDB).filter(s => {
-                let match = true;
-                if(roll && s.roll!== roll) match = false;
-                if(sec && s.section!== sec) match = false;
-                if(course && s.course!== course) match = false;
-                return match;
-            });
-
-            let resultsDiv = document.getElementById('results-list');
-            let searchDiv = document.getElementById('search-results');
-            searchDiv.classList.remove('hidden');
-
-            if(results.length === 0) {
-                resultsDiv.innerHTML = '<p class="text-slate-400 text-center">No students found</p>';
-            } else {
-                resultsDiv.innerHTML = results.map(s => `
-                    <div class="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl hover:bg-slate-800/70 transition-colors">
-                        <div>
-                            <p class="font-semibold">${s.name}</p>
-                            <p class="text-xs text-slate-400">Roll: ${s.roll} | Sec: ${s.section} | ${s.course}</p>
-                        </div>
-                        <button onclick="viewStudent('${s.roll}')" class="bg-blue-
+            document.getElementById('total-obt').innerText = total
