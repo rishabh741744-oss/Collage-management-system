@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P for Problem v4.4 | Final Working</title>
+    <title>P for Problem v4.5 | Final</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script>
@@ -53,11 +53,11 @@
         }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         @media (max-width: 768px) {
- .nav-container { overflow-x: auto; }
- .nav-container::-webkit-scrollbar { display: none; }
+.nav-container { overflow-x: auto; }
+.nav-container::-webkit-scrollbar { display: none; }
         }
-  .break-all { word-break: break-all; }
-  .editable:hover { outline: 2px dashed #3b82f6; cursor: pointer; }
+ .break-all { word-break: break-all; }
+ .editable:hover { outline: 2px dashed #3b82f6; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -65,7 +65,7 @@
         <div class="glass-panel p-8 md:p-10 rounded-3xl w-full max-w-md">
             <div class="text-center mb-8">
                 <h1 class="text-4xl font-bold neon-text mb-2">P for Problem</h1>
-                <p class="text-slate-400 text-sm">v4.4 Final Working</p>
+                <p class="text-slate-400 text-sm">v4.5 Final</p>
             </div>
             <div class="space-y-4">
                 <div>
@@ -277,6 +277,7 @@
                                     <p class="text-slate-500 text-xs">Phone</p>
                                     <p class="text-slate-300 font-semibold break-all" id="admin-phone">+91 98765 43210</p>
                                 </div>
+                            </div>
                             <div class="flex items-start gap-3">
                                 <i class="fas fa-envelope text-slate-500 w-5 mt-1"></i>
                                 <div class="flex-1 min-w-0">
@@ -318,7 +319,6 @@
                             <i class="fas fa-search mr-1"></i> Search
                         </button>
                     </div>
-                </div>
                 <div class="glass-panel p-6 rounded-2xl mb-6">
                     <h3 class="text-lg font-bold text-emerald-400 mb-4"><i class="fas fa-edit mr-2"></i>Edit Contact Details</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -368,7 +368,7 @@
 
         let studentsDB = {
             "01": {
-                name: "Rishabh Kumar", roll: "01", fName: "Rajesh Kumar", section: "A", course: "BCA", college: "ABC College",
+                name: "Rani Kumari", roll: "01", fName: "Ramesh Kumar", section: "A", course: "BCA", college: "ABC College",
                 attendance: "92%", attDays: "184 / 200 Days", sgpa: "8.5", cgpa: "CGPA: 8.2", status: "Pass", statusNote: "All Clear",
                 marks: [
                     {subject: "Mathematics", max: 100, obt: 85, grade: "A"},
@@ -467,10 +467,16 @@
             document.getElementById(`page-${pageName}`).classList.add('active-page');
             document.getElementById(`nav-${pageName}`).classList.add('active');
             window.scrollTo(0, 0);
+
+            // Admin ke liye Profile pe click karne pe data load mat karo
+            if(pageName === 'profile' && currentUserRole === 'admin') {
+                document.getElementById('student-not-loaded').classList.remove('hidden');
+                document.getElementById('student-profile-content').classList.add('hidden');
+            }
         }
 
         function loadProfile(roll) {
-            const s = studentsDB[roll];
+            const s = studentsDB;
             if(!s) return;
             currentStudent = s;
             document.getElementById('student-not-loaded').classList.add('hidden');
@@ -491,7 +497,7 @@
         }
 
         function loadMarksheet(roll) {
-            const s = studentsDB[roll];
+            const s = studentsDB;
             if(!s) return;
             document.getElementById('marksheet-not-loaded').classList.add('hidden');
             document.getElementById('marksheet-content').classList.remove('hidden');
@@ -506,24 +512,4 @@
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-800/30">
                         <td class="p-4 font-medium">${m.subject}</td>
-                        <td class="p-4 text-center">${m.max}</td>
-                        <td class="p-4 text-center font-semibold">${m.obt}</td>
-                        <td class="p-4 text-right"><span class="px-3 py-1 rounded-lg bg-${gradeColor}-500/20 text-${gradeColor}-400 text-xs font-bold">${m.grade}</span></td>
-                    </tr>
-                `;
-            });
-            let perc = ((totalObt/totalMax)*100).toFixed(0);
-            document.getElementById('total-max').innerText = totalMax;
-            document.getElementById('total-obt').innerText = totalObt;
-            document.getElementById('total-perc').innerText = perc + '%';
-        }
-
-        function searchStudent() {
-            const roll = document.getElementById('search-roll').value.trim();
-            const sec = document.getElementById('search-sec').value.trim().toUpperCase();
-            const course = document.getElementById('search-course').value.trim().toUpperCase();
-
-            let results = Object.values(studentsDB).filter(s => {
-                let match = true;
-                if(roll && s.roll!== roll) match = false;
-                if(sec
+                        <td class="p-4 text-center
